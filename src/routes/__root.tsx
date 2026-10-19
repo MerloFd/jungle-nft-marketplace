@@ -9,6 +9,7 @@ import { Toaster, toast } from '@/components/ui/toaster'
 import { LiveRegionProvider } from '@/components/ui/live-region'
 import { NotFoundPage } from '@/components/app/NotFoundPage'
 import { ConnectionBanner } from '@/components/app/ConnectionBanner'
+import { MockPanel } from '@/components/app/MockPanel'
 import { sessionEvents } from '@/lib/http'
 import { handleSessionLost, useLogout, useSession } from '@/features/session/session'
 import { useCartCount } from '@/features/cart/hooks'
@@ -86,6 +87,7 @@ function RootLayout() {
           <AppFooter />
         </div>
         <Toaster />
+        <MockPanel />
       </RealtimeProvider>
     </LiveRegionProvider>
   )

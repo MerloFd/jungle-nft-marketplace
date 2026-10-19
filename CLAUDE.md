@@ -2,6 +2,18 @@
 
 Enunciado: https://github.com/junglegaming/frontend-challenge (leia a seção 11, critérios e eliminatórios).
 
+## Estado atual (19/10, 15h40)
+
+Pronto e testado: contratos, backend simulado completo (todos os handlers REST, Socket.IO com auth,
+heartbeat e reconexão, 16 cenários, window.__mock), cliente HTTP, sessão (login, logout, expiração,
+merge do carrinho), cliente de tempo real, rotas com guarda, UI kit, layout, painel de cenários
+(`components/app/MockPanel.tsx`), config do Playwright e script do Lighthouse (`npm run lighthouse`).
+
+Parcial: `features/account/{api,hooks,form}.ts` e `features/catalog/api.ts` (começados, compilam; revisar).
+
+Falta: todas as páginas em `features/*/pages` (hoje são provisórias), testes E2E em `tests/e2e`,
+ajuste visual com os prints do Figma (tokens em `src/index.css`), README e docs/DECISOES.md.
+
 ## Comandos
 
 ```bash
@@ -10,6 +22,7 @@ npm run dev          # http://localhost:5173 com mocks (MSW) ligados
 npm run typecheck
 npm run build && npm run preview   # build de demonstração (mocks ligados), porta 4173
 npm run test:e2e     # Playwright (sobe build + preview sozinho)
+npm run lighthouse   # com o preview rodando na 4173: 3 medições por página e perfil, relatórios em lighthouse/reports
 ```
 
 Usuários de teste: `ana@jungle.dev` / `jungle123` e `bruno@jungle.dev` / `jungle123`.
