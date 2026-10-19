@@ -46,9 +46,11 @@ export interface WalletFormDialogProps {
   wallet: Wallet | null
   /** Lista atual, para avisar sobre conflito de função. */
   wallets: Wallet[]
+  /** Para onde devolver o foco ao fechar (o diálogo é controlado, sem DialogTrigger). */
+  onCloseFocus?: () => void
 }
 
-export function WalletFormDialog({ open, onOpenChange, wallet, wallets }: WalletFormDialogProps) {
+export function WalletFormDialog({ open, onOpenChange, wallet, wallets, onCloseFocus }: WalletFormDialogProps) {
   const save = useSaveWallet()
   const announce = useAnnounce()
   const formRef = React.useRef<HTMLFormElement>(null)
@@ -59,7 +61,9 @@ export function WalletFormDialog({ open, onOpenChange, wallet, wallets }: Wallet
   // A lista só é lida no momento da abertura (sugestão de função), por isso fica num ref:
   // uma revalidação em segundo plano não deve reescrever o que o usuário está digitando.
   const walletsRef = React.useRef(wallets)
-  walletsRef.current = wallets
+  React.useEffect(() => {
+    walletsRef.current = wallets
+  })
 
   // Ao abrir, o formulário reflete exatamente a carteira escolhida (ou um cadastro limpo).
   React.useEffect(() => {
@@ -109,7 +113,14 @@ export function WalletFormDialog({ open, onOpenChange, wallet, wallets }: Wallet
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="wallet-form-description">
+      <DialogContent
+        aria-describedby="wallet-form-description"
+        onCloseAutoFocus={(event) => {
+          if (!onCloseFocus) return
+          event.preventDefault()
+          onCloseFocus()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{wallet ? 'Editar carteira' : 'Adicionar carteira'}</DialogTitle>
           <DialogDescription id="wallet-form-description">

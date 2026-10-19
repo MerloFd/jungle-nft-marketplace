@@ -1,4 +1,4 @@
-# NFT Marketplace — desafio frontend Jungle Gaming
+# NFT Marketplace: desafio frontend Jungle Gaming
 
 Marketplace de NFTs em React + TypeScript, com backend simulado (REST e tempo real), fluxo de compra
 completo com idempotência, estados de carregamento/vazio/erro em toda tela com dados e testes E2E.
@@ -7,6 +7,8 @@ completo com idempotência, estados de carregamento/vazio/erro em toda tela com 
 - **Decisões explicadas** (material de estudo): [docs/DECISOES.md](docs/DECISOES.md)
 - **Tokens lidos do Figma**: [docs/figma/TOKENS.md](docs/figma/TOKENS.md)
 - **Convenção de seletores e estados**: [docs/TESTIDS.md](docs/TESTIDS.md)
+- **A stack explicada para defender**: [docs/STACK.md](docs/STACK.md)
+- **Especificações por feature**: [docs/ESPECIFICACOES.md](docs/ESPECIFICACOES.md)
 
 ---
 
@@ -34,7 +36,7 @@ npm run dev          # http://localhost:5173 com os mocks ligados
 | `VITE_ENABLE_MOCKS` | `true` / `false` | liga a camada de mocks (MSW + Socket.IO). Já vem `true` em `.env.development` e `.env.production` |
 
 Não há API real: com `VITE_ENABLE_MOCKS=false` a aplicação sobe, mas toda chamada falha. O valor
-`true` no build de produção é intencional — é o que faz a demonstração publicada funcionar.
+`true` no build de produção é intencional: é o que faz a demonstração publicada funcionar.
 
 ### Credenciais de teste
 
@@ -124,17 +126,17 @@ Seleção por `?scenario=<nome>` na URL, pelo painel de cenários (canto inferio
 | --- | --- |
 | `default` | latência realista (150–400ms) |
 | `fast` | sem latência (usado pelos testes) |
-| `slow` | 2,5s por requisição — skeletons |
+| `slow` | 2,5s por requisição, exercita os skeletons |
 | `variable` | latência de 100ms a 2s, gera respostas fora de ordem |
 | `empty` | catálogo sem resultados |
 | `offline` | sem conexão com a API |
 | `server-error` | catálogo responde 500 |
 | `flaky` | a 1ª consulta falha (503), a nova tentativa funciona |
-| `favorites-error` | falha ao favoritar — rollback do otimista |
+| `favorites-error` | falha ao favoritar, com rollback do otimista |
 | `session-expired` | sessão expira na próxima requisição autenticada |
 | `price-change` | preço muda durante o checkout |
 | `sold-out` | edição esgota durante o checkout |
-| `order-timeout` | timeout após criar o pedido — recuperação por idempotência |
+| `order-timeout` | timeout após criar o pedido, com recuperação por idempotência |
 | `payment-declined` | pagamento recusado |
 | `wallet-rejects` | carteira recusa a conexão |
 | `socket-drop` | conexão em tempo real cai com o pedido pendente |
@@ -163,7 +165,7 @@ Superfície de controle usada pelos testes e pela demonstração:
 ### Reset
 
 `window.__mock.reset()` no console, ou o botão **Restaurar** no painel de cenários. O reset restaura
-o seed por completo — catálogo, usuários, carrinhos, pedidos e carteiras — e zera o registro de
+o seed por completo (catálogo, usuários, carrinhos, pedidos e carteiras) e zera o registro de
 eventos do tempo real. Todo teste E2E começa por ele.
 
 ---
@@ -235,7 +237,7 @@ e-mail**, com o foco indo para ele.
    comparar a URL e capturaria junto o WebSocket do HMR do Vite.
 2. **A aplicação é importada depois de o MSW iniciar.** O `engine.io-client` captura
    `globalThis.WebSocket` ao carregar o módulo; avaliado antes do MSW, ele guardaria o WebSocket
-   original e escaparia da interceptação — o socket falharia em silêncio.
+   original e escaparia da interceptação, e o socket falharia em silêncio.
 3. **O heartbeat é manual**: o mock envia o ping do protocolo a cada 20s, senão o cliente cai por
    ping timeout.
 4. A API publicada do `@mswjs/socket.io-binding` (0.2.0) é `toSocketIo(connection)`; o README do
@@ -280,7 +282,7 @@ perfil. Relatórios HTML e JSON de cada execução em `lighthouse/reports/`.
 
 A causa é o próprio requisito de entrega. O enunciado exige que a versão publicada funcione com os
 mocks e o tempo real, então o build de demonstração carrega a camada MSW (≈483kB, 177kB comprimido) e
-**espera o worker iniciar antes de renderizar qualquer coisa** — a aplicação é importada só depois do
+**espera o worker iniciar antes de renderizar qualquer coisa**. A aplicação é importada só depois do
 `await startMocks()`, pela razão descrita em [docs/DECISOES.md](docs/DECISOES.md#6-por-que-a-aplicação-carrega-depois-do-msw).
 Isso empurra o LCP para depois do boot do service worker, e o efeito é maior no perfil mobile, que o
 Lighthouse mede com CPU e rede limitadas.
@@ -297,8 +299,8 @@ as medições carregam as mesmas imagens, fontes e funcionalidades da entrega.
 
 ## O que ficou de fora, e por quê
 
-**Composição visual ainda não é fiel ao Figma.** Os tokens — paleta, escala tipográfica, raios e
-grade — foram lidos do arquivo e aplicados, e a identidade visual está correta. O **arranjo** das
+**Composição visual ainda não é fiel ao Figma.** Os tokens (paleta, escala tipográfica, raios e
+grade) foram lidos do arquivo e aplicados, e a identidade visual está correta. O **arranjo** das
 telas não: o Figma tem um hero com imagem e navegação própria (Início/Mercado/Criadores/Aprenda com
 busca), cards reduzidos a imagem, nome e preço, e uma barra lateral de filtros com contagem por
 coleção e faixa de preço com slider. A implementação entrega a mesma informação num arranjo próprio.
@@ -307,7 +309,7 @@ Foi uma escolha de prioridade: com o prazo apertado, preferi garantir os critér
 
 **A família tipográfica não foi confirmada.** O arquivo do Figma amarra a fonte a uma variável
 `font/family` que o modo de visualização não resolve. A interface é monoespaçada no desenho, e o
-projeto usa Space Mono — a correspondência mais próxima disponível. Trocar é alterar uma linha em
+projeto usa Space Mono, a correspondência mais próxima disponível. Trocar é alterar uma linha em
 `src/index.css`.
 
 **Cores de estado são inferência.** O Figma não define erro, sucesso e aviso. Os valores em uso foram
@@ -322,28 +324,40 @@ escolhidos para conviver com a paleta âmbar e passar nos limites de contraste. 
 
 ## Uso de IA no desenvolvimento
 
-O projeto foi desenvolvido com Claude Code, e vale registrar **como**, porque o método influenciou a
-arquitetura.
+O projeto foi desenvolvido com Claude Code em um fluxo orientado a especificação. O método está
+documentado em [docs/ESPECIFICACOES.md](docs/ESPECIFICACOES.md), com a especificação de cada feature
+e a fronteira de escrita de cada frente.
 
-**Especificação antes de implementação.** O `CLAUDE.md` descreve arquitetura, regras eliminatórias e
-armadilhas já resolvidas; `src/contracts/` é o contrato executável que a interface, o cliente HTTP e
-os mocks compartilham; `docs/TESTIDS.md` fixa os seletores e os estados obrigatórios de tela. Esses
-documentos existiam antes do código que eles governam.
+**O ciclo foi especificar, congelar, paralelizar, verificar.**
 
-**Implementação em paralelo com fronteiras explícitas.** Catálogo, carrinho/checkout e conta foram
-implementados simultaneamente por agentes distintos, cada um com um conjunto de escrita disjunto
-(suas próprias pastas) e proibidos de alterar o que é compartilhado (`contracts`, `lib`, `mocks`,
-`components/ui`). Durante a execução, nada compartilhado mudou — é o que impede um agente de trabalhar
-sobre uma versão desatualizada de um arquivo que outro acabou de reescrever. A verificação
-(`typecheck`, `build`, E2E) foi feita depois, em série.
+*Especificar.* Três artefatos governam o código e existem em commits anteriores a ele:
+`src/contracts/` (schemas Zod que são a fonte única de tipos entre transporte, estado e interface),
+`CLAUDE.md` (arquitetura, regras eliminatórias e armadilhas conhecidas) e `docs/TESTIDS.md`
+(seletores e os cinco estados obrigatórios de toda tela com dados).
 
-**Decisões técnicas foram revisadas, não aceitas.** Dois exemplos registrados no histórico: um agente
-identificou que o mock nunca liquidava um pedido pendente após um refresh (a confirmação era agendada
-com `setTimeout` em memória), o que tornava impossível o cenário obrigatório de recuperação; e outro
-apontou que o cabeçalho estourava 19px na largura de 768px. Ambos foram corrigidos à mão, com a razão
-registrada na mensagem de commit.
+*Congelar.* Durante a implementação, nada em `contracts/`, `lib/`, `mocks/`, `realtime/` ou
+`components/ui/` podia mudar. Essa é a condição que torna a paralelização segura: o que duas frentes
+leem em comum não se move enquanto elas trabalham.
 
-**Os tokens visuais foram lidos, não estimados.** As cores, a escala tipográfica e a grade vieram do
-painel de propriedades do Figma, como texto. `docs/figma/TOKENS.md` marca cada valor como **LIDO** ou
-**INFERIDO**, e a família tipográfica está explicitamente registrada como não resolvida — o arquivo a
-prende a uma variável que o modo de visualização não expõe.
+*Paralelizar.* Catálogo, carrinho/checkout e conta foram implementados ao mesmo tempo, cada um
+escrevendo apenas nas próprias pastas. Conjuntos de escrita disjuntos eliminam conflito de edição
+por construção, não por convenção.
+
+*Verificar em série.* `typecheck`, `build`, `lint` e E2E só depois que todas as frentes terminaram,
+porque durante a execução o disco contém arquivos pela metade das outras.
+
+**O que foi revisado em vez de aceito.** Cinco defeitos reais apareceram e foram corrigidos à mão,
+cada um com a razão na mensagem de commit: o mock nunca liquidava um pedido pendente após refresh
+(a confirmação era agendada com `setTimeout` em memória, o que tornava impossível o cenário
+obrigatório de recuperação); o cabeçalho estourava 19px em 768px; o merge do carrinho de visitante
+publicava a sessão antes de terminar, e um reload nessa janela perdia os itens; o diálogo de
+carteiras não devolvia o foco ao botão que o abriu; e sair da conta deixava a tela privada montada.
+
+Uma decisão foi revertida por leitura do contrato: a especificação inicial mandava avisar que a
+carteira principal seria rebaixada, mas a API responde `409 CONFLICT` em vez de rebaixar. A interface
+passou a refletir o que a API faz, em vez de a API ser mudada para justificar a interface.
+
+**Os tokens visuais foram lidos, não estimados.** Cores, escala tipográfica, raios e grade vieram do
+painel de propriedades do Figma, como texto. [docs/figma/TOKENS.md](docs/figma/TOKENS.md) marca cada
+valor como **LIDO** ou **INFERIDO**, e a família tipográfica está registrada como não resolvida,
+porque o arquivo a prende a uma variável que o modo de visualização não expõe.

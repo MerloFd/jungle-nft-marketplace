@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { sessionQueryOptions } from '@/features/session/session'
+import { sessionQueryOptions, useSession } from '@/features/session/session'
 
-/** Layout das rotas privadas: checkout, pedidos, perfil e carteiras. */
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ context, location }) => {
     const session = await context.queryClient.ensureQueryData(sessionQueryOptions)
@@ -10,5 +9,17 @@ export const Route = createFileRoute('/_authenticated')({
     }
     return { user: session.user }
   },
-  component: Outlet,
+  component: AuthenticatedLayout,
 })
+
+/**
+ * O beforeLoad só roda na próxima navegação, então sair da conta estando numa
+ * tela privada deixaria o conteúdo montado. Aqui o conteúdo some na hora; quem
+ * navega é o fluxo que encerrou a sessão (logout no cabeçalho, ou o
+ * SessionWatcher no caso de 401, que leva ao login preservando o destino).
+ */
+function AuthenticatedLayout() {
+  const { isAuthenticated, isPending } = useSession()
+  if (!isPending && !isAuthenticated) return null
+  return <Outlet />
+}

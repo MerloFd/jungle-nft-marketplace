@@ -11,7 +11,7 @@ quem escreve o teste em `tests/e2e` só usa estes identificadores (ou papéis/r�
 - Todo bloco com dados remotos tem os cinco estados, com os sufixos abaixo:
   - carregando: `<bloco>-skeleton` (usar `<Skeleton>`; mesmas dimensões do conteúdo real)
   - vazio: `<bloco>-empty` (`<EmptyState>`)
-  - erro: `<bloco>-error` (`<ErrorState onRetry>` — botão "Tentar novamente")
+  - erro: `<bloco>-error` (`<ErrorState onRetry>`, com botão "Tentar novamente")
   - sucesso: `<bloco>` (a própria lista/cartão)
   - atualizando em segundo plano: `<UpdatingIndicator id="<bloco>">` → `<bloco>-updating`
 

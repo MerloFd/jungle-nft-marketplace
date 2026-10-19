@@ -10,7 +10,7 @@
  *   app redireciona para o login com `redirect` para retomar o fluxo.
  */
 import { queryOptions, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import type { LoginInput, RegisterInput, Session, SessionInfo } from '@/contracts'
+import type { Cart, LoginInput, RegisterInput, Session, SessionInfo } from '@/contracts'
 import { getGuestId, isApiError, rotateGuestId, tokenStore } from '@/lib/http'
 import { qk } from '@/lib/query-keys'
 import { sessionApi } from './api'
@@ -66,14 +66,18 @@ async function establish(qc: QueryClient, session: Session) {
   if (previous?.user && previous.user.id !== session.user.id) qc.clear()
   clearPrivateCache(qc)
   setToken(session.token)
-  qc.setQueryData(sessionQueryOptions.queryKey, { expiresAt: session.expiresAt, user: session.user } as SessionInfo | null)
+  // O merge acontece antes de publicar a sessão: enquanto ele está no ar a
+  // interface ainda não se considera autenticada, então um reload nessa janela
+  // não deixa o carrinho do visitante órfão.
+  let merged: Cart | null = null
   try {
-    const cart = await sessionApi.mergeGuestCart(getGuestId())
+    merged = await sessionApi.mergeGuestCart(getGuestId())
     rotateGuestId()
-    qc.setQueryData(qk.cart(session.user.id), cart)
   } catch {
-    /* merge falhou (ex.: rede): o carrinho do visitante continua no servidor e é tentado de novo no próximo login */
+    /* sem rotacionar o id do visitante, o merge é tentado de novo no próximo login */
   }
+  qc.setQueryData(sessionQueryOptions.queryKey, { expiresAt: session.expiresAt, user: session.user } as SessionInfo | null)
+  if (merged) qc.setQueryData(qk.cart(session.user.id), merged)
 }
 
 export function useLogin() {

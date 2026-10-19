@@ -28,7 +28,7 @@ Cada tentativa de compra ganha uma **chave única** (`crypto.randomUUID()`), env
 mesma chave, ele **não cria outro**: devolve o que já existe.
 
 A chave vive em `sessionStorage`, então sobrevive a um refresh, e está amarrada à *intenção de
-compra* — identificada pelo par `(quoteId, fingerprint)`. Isso define com precisão quando reusar e
+compra*, identificada pelo par `(quoteId, fingerprint)`. Isso define com precisão quando reusar e
 quando renovar:
 
 - **Mesma intenção** (reenvio após timeout, usuário clicou de novo): **a mesma chave**. O servidor
@@ -51,11 +51,11 @@ não aparece em teste manual (a rede do desenvolvedor é boa) e aparece em produ
 ### O problema
 
 Tempo real não é uma fila ordenada e confiável. O mesmo evento pode chegar duas vezes (a biblioteca
-reenvia), e eventos podem chegar **fora de ordem** — o preço muda para 2 ETH e depois para 3 ETH, mas
+reenvia), e eventos podem chegar **fora de ordem**: o preço muda para 2 ETH e depois para 3 ETH, mas
 o de 3 chega primeiro.
 
 Processar ingenuamente dá dois problemas: efeito aplicado em dobro (dois avisos, duas animações) e,
-pior, **estado andando para trás** — você vê 3 ETH, chega o evento atrasado de 2 ETH, e a tela mostra
+pior, **estado andando para trás**: você vê 3 ETH, chega o evento atrasado de 2 ETH, e a tela mostra
 um preço que já não vale.
 
 ### O que foi feito
@@ -91,7 +91,7 @@ um checkout exibindo um valor que o servidor já não aceita.
 ### O problema
 
 O socket cai por 30 segundos. Nesse intervalo, três NFTs mudam de preço e um pedido é confirmado.
-Esses eventos **não existem mais** — não há ninguém guardando para entregar depois. Quando a conexão
+Esses eventos **não existem mais**, porque não há ninguém guardando para entregar depois. Quando a conexão
 volta, a tela está desatualizada e não sabe disso.
 
 ### O que foi feito
@@ -122,7 +122,7 @@ sempre numa tela que nunca mais se atualiza.
 ### O problema
 
 O TanStack Query guarda dados numa chave. Se a chave for `['favorites']`, ela é a mesma para todo
-mundo. A Ana faz login, carrega os favoritos dela, sai; o Bruno entra — e vê os favoritos da Ana até
+mundo. A Ana faz login, carrega os favoritos dela, sai; o Bruno entra e vê os favoritos da Ana até
 a próxima busca terminar.
 
 No desafio isso não é um detalhe: **"exposição de dados entre usuários" é critério eliminatório**.
@@ -139,18 +139,18 @@ cart:      (scope)  => ['cart', scope]   // scope = userId ou 'guest'
 ```
 
 Dado do Bruno e dado da Ana ocupam lugares diferentes. Não existe o conceito de "os favoritos" sem
-dono — é impossível ler o dado errado por engano, porque a chave errada simplesmente não tem dado.
+dono, e por isso é impossível ler o dado errado por engano, porque a chave errada simplesmente não tem dado.
 
 **Segunda: a troca de sessão limpa.** No logout, `queryClient.clear()`. Na troca de usuário, o cache
 inteiro é descartado antes de estabelecer a sessão nova. E o socket é recriado, porque ele também
-carrega identidade — eventos `order.updated` de outro `userId` são descartados na chegada.
+carrega identidade, e eventos `order.updated` de outro `userId` são descartados na chegada.
 
 A primeira camada evita o vazamento; a segunda evita que dados de um usuário fiquem ocupando memória
 e aparecendo em refetches depois que ele saiu.
 
 ### Sem isso
 
-Um bug de privacidade — a pior categoria. E neste desafio, nota zero direto.
+Um bug de privacidade, a pior categoria que existe. E neste desafio, nota zero direto.
 
 ---
 
@@ -164,7 +164,7 @@ Um bug de privacidade — a pior categoria. E neste desafio, nota zero direto.
 ```
 
 Isso não é bug do JavaScript: é como números de ponto flutuante funcionam. Eles guardam valores em
-base 2, e `0.1` não tem representação exata em base 2 — do mesmo jeito que `1/3` não tem
+base 2, e `0.1` não tem representação exata em base 2, do mesmo jeito que `1/3` não tem
 representação decimal exata.
 
 Para a largura de uma caixa, o erro é irrelevante. Para **dinheiro**, não: os erros se acumulam a
@@ -177,7 +177,7 @@ inteira.
 aritmética passa por `decimal.js`, em `src/lib/money.ts`:
 
 ```ts
-eth.add('0.1', '0.2')   // "0.3" — exato
+eth.add('0.1', '0.2')   // "0.3", exato
 formatEth('0.125')      // "0.125 ETH"
 ```
 
@@ -209,7 +209,7 @@ const WebSocketImpl = globalThis.WebSocket   // guarda a referência AGORA
 
 O MSW, por sua vez, intercepta **substituindo** `globalThis.WebSocket` por uma versão própria.
 
-Então a ordem decide tudo. Se o Socket.IO for avaliado primeiro, ele guarda o WebSocket **original** —
+Então a ordem decide tudo. Se o Socket.IO for avaliado primeiro, ele guarda o WebSocket **original**,
 e continua usando essa referência para sempre, mesmo depois de o MSW trocar a global. O resultado é
 um socket que tenta conectar num servidor que não existe, e falha em silêncio. Não há erro útil: só
 uma conexão que nunca abre.
@@ -236,7 +236,7 @@ carregue este módulo depois daquele `await`".
 ### Dois primos do mesmo problema
 
 - **O caminho do socket é `/realtime/`, não `/socket.io/`.** O MSW remove o prefixo `/socket.io/`
-  antes de comparar a URL, e com isso capturaria também o WebSocket do HMR do Vite — o recarregamento
+  antes de comparar a URL, e com isso capturaria também o WebSocket do HMR do Vite, e o recarregamento
   automático do desenvolvimento pararia de funcionar.
 - **O mock envia o ping do protocolo a cada 20s.** O Socket.IO derruba a conexão por conta própria se
   o servidor não dá sinal de vida. Como aqui o "servidor" é código no navegador, esse heartbeat
@@ -262,7 +262,7 @@ Não há Redux nem Zustand, e isso é proposital. O estado foi separado por natu
 | rascunho do checkout e chave de idempotência | `sessionStorage` | precisa sobreviver a refresh, mas não é dado de servidor |
 | abrir/fechar, passo do formulário | `useState` | não é global e não deve virar global |
 
-Colocar um store global por cima duplicaria o cache do Query — e dado duplicado é dado que diverge.
+Colocar um store global por cima duplicaria o cache do Query, e dado duplicado é dado que diverge.
 Pior: seria o caminho mais curto para o vazamento entre usuários da seção 4.
 
 ### Por que a URL é a fonte da verdade do catálogo

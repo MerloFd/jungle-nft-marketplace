@@ -43,14 +43,27 @@ export function WalletsPage() {
   // A API aceita uma carteira por função (principal/secundária): com as duas, só resta editar.
   const rolesFull = items.some((w) => w.role === 'primary') && items.some((w) => w.role === 'secondary')
 
+  // O diálogo é controlado e não tem DialogTrigger, então o Radix não tem gatilho
+  // para devolver o foco. Guardamos o seletor, e não o nó: a lista revalida ao
+  // fechar e o elemento original pode já ter sido substituído.
+  const triggerSelector = React.useRef<string | null>(null)
+
   function openNew() {
+    triggerSelector.current = '[data-testid="wallet-new"]'
     setEditing(null)
     setOpen(true)
   }
 
   function openEdit(wallet: Wallet) {
+    triggerSelector.current = `[data-testid="wallet-edit-${wallet.id}"]`
     setEditing(wallet)
     setOpen(true)
+  }
+
+  function restoreFocus() {
+    const selector = triggerSelector.current
+    if (!selector) return
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(selector)?.focus())
   }
 
   return (
@@ -115,7 +128,13 @@ export function WalletsPage() {
         )}
       </div>
 
-      <WalletFormDialog open={open} onOpenChange={setOpen} wallet={editing} wallets={items} />
+      <WalletFormDialog
+        open={open}
+        onOpenChange={setOpen}
+        wallet={editing}
+        wallets={items}
+        onCloseFocus={restoreFocus}
+      />
     </PageContainer>
   )
 }

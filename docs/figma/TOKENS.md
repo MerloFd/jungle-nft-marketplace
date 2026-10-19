@@ -1,4 +1,4 @@
-# Tokens lidos do Figma — "Marketplace de NFTs GreenMint" (marca na tela: **KURIO**)
+# Tokens lidos do Figma: "Marketplace de NFTs GreenMint" (marca na tela: **KURIO**)
 
 Arquivo: `Frontend-Challenge` (Ff0SksUi7UFtPWUO8kyNtw), página "Marketplace de NFTs GreenMint".
 Acesso: somente visualização e comentário (sem Dev Mode).
@@ -8,7 +8,7 @@ Acesso: somente visualização e comentário (sem Dev Mode).
 | marca | o que significa |
 | --- | --- |
 | **LIDO** | valor que o painel Properties do Figma mostrou como texto. Não há inferência: ou o painel dizia isso, ou não está aqui. |
-| **INFERIDO** | leitura minha a partir da imagem renderizada. Pode estar errado — é exatamente o que eu preciso que você confirme. |
+| **INFERIDO** | leitura minha a partir da imagem renderizada. Pode estar errado, e é exatamente o que eu preciso que você confirme. |
 
 Confira as linhas LIDO por garantia, mas o foco da sua revisão são as linhas **INFERIDO**.
 
@@ -44,11 +44,11 @@ tokens no `src/index.css`, para o CSS ficar rastreável ao Figma.
 | `Body/14 Regular` | 14px / 24px | 400 | 0% | LIDO | parágrafo do hero |
 | `Body/14 Medium` | 14px / 16px | 500 | **10%** | LIDO | sobretítulo "Bem-vindo à Kurio" |
 | `Body Large/18 Bold` | 18px / 16px | 700 | 0% | LIDO | preço no card de NFT |
-| família tipográfica | `font/family` (variável) | — | — | **NÃO RESOLVIDO** | o painel mostra o nome da variável, não a fonte |
+| família tipográfica | `font/family` (variável) | n/a | n/a | **NÃO RESOLVIDO** | o painel mostra o nome da variável, não a fonte |
 
 **A família é o buraco da leitura.** O arquivo prende a fonte a uma variável chamada `font/family`
 e, sem Dev Mode, o painel não resolve o valor. Pela imagem, o arquivo inteiro (títulos, corpo,
-navegação, preços) usa uma **monoespaçada** — INFERIDO. O projeto já carrega Space Mono, que bate
+navegação, preços) usa uma **monoespaçada**, o que é INFERIDO. O projeto já carrega Space Mono, que bate
 visualmente com o desenho. Preciso que você confirme o nome da fonte (no Figma: selecione um texto
 e veja o painel de tipografia, ou me diga o que aparece em `font/family`).
 
@@ -73,13 +73,13 @@ e veja o painel de tipografia, ou me diga o que aparece em `font/family`).
 > Impacto direto: hoje o `PageContainer` usa `max-w-[1280px]` com `px-[115px]`.
 > O correto é conteúdo de **1200px** com **120px** de padding lateral no desktop.
 
-## 4. Estrutura da home (LIDO — nomes das camadas)
+## 4. Estrutura da home (LIDO, nomes das camadas)
 
 `Desktop / Início` → `Top` → `Header With Divider` → `Header Row` (`Logo`, `Nav`, `Header Actions`
 → `Search Icon`, `Cart`, `Login`) + `Line 1`; depois `Hero`; e as seções `Products`, `Promos`,
 `Blog`, `Footer`.
 
-## 5. Conteúdo visível (INFERIDO — da imagem)
+## 5. Conteúdo visível (INFERIDO, lido da imagem)
 
 - Marca na tela: **KURIO** (logotipo à esquerda, caixa alta, espaçamento largo).
 - Navegação: Início · Mercado · Criadores · Aprenda. O item ativo é laranja com sublinhado.
@@ -103,6 +103,6 @@ e veja o painel de tipografia, ou me diga o que aparece em `font/family`).
 
 ## 7. O que ainda falta ler
 
-1. Família tipográfica (bloqueada pela variável `font/family` — **preciso de você**).
+1. Família tipográfica (bloqueada pela variável `font/family`): **preciso de você**.
 2. Cores de estado do pedido (pendente / confirmado / recusado) nas telas de Pagamento e Confirmação.
 3. Medidas internas das telas de Detalhe, Carrinho, Pagamento, Login, Perfil e Carteiras.

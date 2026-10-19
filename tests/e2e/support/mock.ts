@@ -35,11 +35,11 @@ export interface MockControl {
   emitDuplicateOfLast(): unknown
   emitStale(type: 'nft' | 'order', id: string): unknown
   dropSockets(): unknown
-  connectedPeers(): number
+  connectedPeers(): Array<{ id: string; userId: string | null }>
   disconnectWallet(userId?: string): void
   state(): {
     nfts: Array<{ id: string; name: string; editions: Array<{ id: string; priceEth: string; available: number }> }>
-    orders: Array<{ id: string; status: string; idempotencyKey: string }>
+    orders: Record<string, { id: string; status: string; idempotencyKey: string }>
     [key: string]: unknown
   }
 }

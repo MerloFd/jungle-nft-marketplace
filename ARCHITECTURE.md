@@ -23,7 +23,7 @@ src/
 ```
 
 **A dependência só aponta para dentro.** `features` conhece `lib` e `contracts`; `lib` não conhece
-`features`; nenhuma feature importa componentes de outra — apenas hooks públicos (`useSession`,
+`features`; nenhuma feature importa componentes de outra, apenas hooks públicos (`useSession`,
 `useAddToCart`, `useWallets`). Foi essa regra que permitiu implementar catálogo, carrinho/checkout e
 conta em paralelo, com conjuntos de escrita disjuntos.
 
@@ -57,8 +57,8 @@ erro, e não um dado torto dentro do cache.
 | --- | --- | --- |
 | `POST /auth/register` | `RegisterInput` | `Session` (409 `EMAIL_TAKEN` com `fields`) |
 | `POST /auth/login` | `LoginInput` | `Session` (401 `INVALID_CREDENTIALS`) |
-| `GET /auth/session` | — | `SessionInfo` (401 `SESSION_EXPIRED`) |
-| `POST /auth/logout` | — | `{ ok: true }` |
+| `GET /auth/session` | sem corpo | `SessionInfo` (401 `SESSION_EXPIRED`) |
+| `POST /auth/logout` | sem corpo | `{ ok: true }` |
 
 ### Catálogo
 
@@ -75,7 +75,7 @@ erro, e não um dado torto dentro do cache.
 `POST /cart/acknowledge` · `POST/DELETE /cart/coupon` · `POST /cart/merge`.
 
 Visitante é identificado pelo cabeçalho `X-Guest-Id`; usuário, pelo `Authorization`. **Toda mutation
-devolve o carrinho inteiro**, incluindo o `summary` — o cliente nunca recalcula valores.
+devolve o carrinho inteiro**, incluindo o `summary`. O cliente nunca recalcula valores.
 
 ### Cotação e pedido
 
@@ -98,7 +98,7 @@ devolve o carrinho inteiro**, incluindo o `summary` — o cliente nunca recalcul
 
 Formato único: `{ error: { code, message, fields?, details? } }`. Os códigos são o enum `ErrorCode`
 do contrato. `src/lib/http.ts` normaliza tudo em `ApiError`, com `status`, `code`, `fields`,
-`isNetworkError`, `isTimeout` e a propriedade derivada `isTransient` — é ela que decide o retry.
+`isNetworkError`, `isTimeout` e a propriedade derivada `isTransient`, que é quem decide o retry.
 
 `fields` é o que permite mostrar o erro **no campo certo** do formulário (por exemplo, o 409 de
 cadastro cai no campo de e-mail), em vez de um aviso genérico solto na tela.
@@ -144,7 +144,7 @@ Transporte: `websocket`, caminho **`/realtime/`**. Autenticação no handshake (
   `reason=expired`.
 - Logout: `queryClient.clear()` e o socket reconecta como anônimo.
 
-**Isolamento entre usuários** (critério eliminatório): toda chave privada carrega o `userId` —
+**Isolamento entre usuários** (critério eliminatório): toda chave privada carrega o `userId`:
 `['user', <userId>, 'favorites' | 'profile' | 'wallets' | 'order', …]` e
 `['cart', <userId | 'guest'>]`. Sem isso, trocar de conta mostraria dados da anterior.
 
@@ -164,7 +164,7 @@ Política em `src/lib/query-client.ts`:
 | `refetchOnWindowFocus` e `refetchOnReconnect` | ligados | |
 
 **Invalidação após mutation**: as mutations de carrinho **substituem** o cache com o carrinho
-devolvido pela API (`setQueryData`) em vez de invalidar — a resposta já é o estado novo e completo,
+devolvido pela API (`setQueryData`) em vez de invalidar, porque a resposta já é o estado novo e completo,
 então não há ida e volta extra nem janela de inconsistência. Favoritos usam atualização otimista com
 rollback (`onMutate` guarda o snapshot, `onError` restaura, `onSettled` invalida).
 
@@ -188,7 +188,7 @@ como rede de segurança atrás do socket: mesmo com o tempo real indisponível, 
 
 ## 7. Compra: idempotência e segurança dos valores
 
-1. **Cotação**: entrar na revisão cria uma `Quote` — snapshot com `fingerprint` (hash de linhas,
+1. **Cotação**: entrar na revisão cria uma `Quote`, um snapshot com `fingerprint` (hash de linhas,
    cupom e rede).
 2. **Revalidação**: antes de todo envio, `POST /quotes/:id/validate`. Se mudou, a interface mostra as
    diferenças e **exige um novo aceite explícito**. Nunca se envia um valor que o usuário não viu.
@@ -211,7 +211,7 @@ demonstração.
 - Tempo real: `src/mocks/realtime.ts` usando `@mswjs/socket.io-binding`.
 - Estado: `src/mocks/db.ts`, com seed determinístico e persistência em `localStorage`.
 - Cenários: `src/mocks/scenarios.ts` (16), selecionáveis por `?scenario=`, pelo painel de cenários ou
-  por `window.__mock.setScenario()`. A latência "variável" usa um PRNG semeado — a mesma sequência de
+  por `window.__mock.setScenario()`. A latência "variável" usa um PRNG semeado: a mesma sequência de
   requisições produz os mesmos atrasos, então os testes são reprodutíveis.
 - Controle para testes: `window.__mock` (`reset`, `setScenario`, `expireSessions`, `updateEdition`,
   `emitDuplicateOfLast`, `emitStale`, `dropSockets`, `connectedPeers`, `state`).
