@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { type z } from 'zod'
 import { Cart, Session, SessionInfo, type LoginInput, type RegisterInput } from '@/contracts'
 import { http, request } from '@/lib/http'
 

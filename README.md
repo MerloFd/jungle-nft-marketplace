@@ -160,6 +160,73 @@ Superfície de controle usada pelos testes e pela demonstração:
 
 `window.__realtimeStatus` expõe o estado do socket.
 
+### Reset
+
+`window.__mock.reset()` no console, ou o botão **Restaurar** no painel de cenários. O reset restaura
+o seed por completo — catálogo, usuários, carrinhos, pedidos e carteiras — e zera o registro de
+eventos do tempo real. Todo teste E2E começa por ele.
+
+---
+
+## Como reproduzir os fluxos de falha
+
+Cada roteiro abaixo leva menos de um minuto e começa com a aplicação rodando (`npm run dev`).
+
+### Pagamento recusado
+1. Abra `/?scenario=payment-declined`.
+2. Entre com `ana@jungle.dev` / `jungle123`, adicione um NFT ao carrinho e vá até o fim do checkout.
+3. O pedido entra em `pending` e a API o recusa: a página mostra o motivo e o **carrinho continua
+   intacto** para tentar de novo.
+
+### Timeout com recuperação por idempotência
+1. Abra `/?scenario=order-timeout` e percorra o checkout até "Confirmar compra".
+2. A primeira resposta demora mais que o timeout do cliente. A interface não assume falha: avisa que
+   está verificando e consulta `GET /orders?idempotencyKey=`.
+3. O pedido aparece **uma única vez**. Confira em `window.__mock.state().orders`.
+
+### Clique repetido
+No mesmo checkout, clique duas vezes seguidas em "Confirmar compra". O botão bloqueia a segunda
+chamada antes do re-render; `window.__mock.state().orders` continua com um pedido só.
+
+### Preço mudando durante o checkout
+1. Abra `/?scenario=price-change` e vá até a revisão.
+2. Chega um `nft.updated` pelo socket: a cotação é revalidada, as diferenças aparecem e **o botão de
+   confirmar fica bloqueado** até você aceitar os valores novos.
+3. Para disparar manualmente, em qualquer cenário:
+   `window.__mock.updateEdition('nft-01', 'ed-01-1', { priceEth: '9.5' })`.
+
+### Evento duplicado ou antigo
+Com o detalhe de um NFT aberto: `window.__mock.emitDuplicateOfLast()` (o aviso **não** se repete) e
+`window.__mock.emitStale('nft', 'nft-01')` (a tela **não** regride para o valor antigo).
+
+### Queda de conexão com pedido pendente
+1. Abra `/?scenario=socket-drop` e finalize uma compra.
+2. O socket cai antes da confirmação e o evento se perde. O pedido converge assim mesmo, pelo
+   polling de segurança e pela reconciliação na reconexão.
+3. Manualmente: `window.__mock.dropSockets()`; acompanhe por `window.__realtimeStatus`.
+
+### Sessão expirada no meio do fluxo
+Autenticado, rode `window.__mock.expireSessions()` e faça qualquer ação autenticada. A sessão é
+encerrada, você volta ao login com o aviso de expiração, e ao entrar de novo retoma o destino
+original pelo parâmetro `redirect`.
+
+### Falha ao favoritar, com rollback
+Em `/?scenario=favorites-error`, favorite um NFT no detalhe. O coração muda na hora (otimista) e
+**volta ao estado anterior** quando a API falha, com mensagem de erro.
+
+### Catálogo lento, vazio, com erro e recuperação
+`?scenario=slow` (skeletons com as dimensões do conteúdo), `?scenario=empty` (estado vazio),
+`?scenario=offline` (erro com "Tentar novamente") e `?scenario=flaky` (a primeira consulta falha e o
+botão de nova tentativa recupera).
+
+### Cupom inválido e expirado
+No carrinho, aplique `EXPIRED20` (expirado) ou qualquer código inexistente (inválido). O erro aparece
+**associado ao campo**, não como aviso solto.
+
+### Conflito de cadastro
+Em `/register`, cadastre-se com `ana@jungle.dev`. A API responde 409 e o erro cai **no campo de
+e-mail**, com o foco indo para ele.
+
 ---
 
 ## Limitações do transporte Socket.IO sobre MSW
