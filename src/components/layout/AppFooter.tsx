@@ -1,4 +1,3 @@
-import { Store } from 'lucide-react'
 import { PageContainer } from './PageContainer'
 
 const externalLinks = [
@@ -6,41 +5,63 @@ const externalLinks = [
   { href: 'https://ethereum.org/pt-br/nft/', label: 'O que são NFTs' },
 ]
 
+const internalLinks = [
+  { href: '/', label: 'Início' },
+  { href: '/#catalogo', label: 'Mercado' },
+  { href: '/cart', label: 'Carrinho' },
+]
+
+const linkClass =
+  'inline-flex min-h-11 items-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+
 export function AppFooter() {
   const year = new Date().getFullYear()
   return (
-    <footer className="mt-16 border-t border-border bg-card">
-      <PageContainer className="flex flex-col gap-8 py-10 md:flex-row md:justify-between">
-        <div className="flex max-w-sm flex-col gap-3">
-          <p className="inline-flex items-center gap-3">
-            <Store aria-hidden="true" className="size-7 text-brand" />
-            <span className="font-mono text-lg font-bold">NFT Marketplace</span>
-          </p>
-          <p className="text-muted-foreground">
-            Projeto de demonstração. Pagamentos, carteiras e blockchain são simulados.
-          </p>
+    <footer className="mt-24">
+      <PageContainer>
+        <div aria-hidden="true" className="h-px bg-primary/40" />
+        <div className="flex flex-col gap-10 py-12 md:flex-row md:justify-between md:gap-16">
+          <div className="flex max-w-[360px] flex-col gap-4">
+            <p className="text-xl font-bold uppercase tracking-[0.2em]">Kurio</p>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Mercado de NFTs de artistas independentes. Projeto de demonstração: pagamentos, carteiras e blockchain
+              são simulados.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-10 sm:flex-row sm:gap-16">
+            <nav aria-label="Navegação do rodapé">
+              <h2 className="mb-2 text-base font-bold uppercase tracking-[0.1em]">Mercado</h2>
+              <ul className="flex flex-col">
+                {internalLinks.map((link) => (
+                  <li key={link.href}>
+                    <a href={link.href} className={linkClass}>
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <nav aria-label="Links externos">
+              <h2 className="mb-2 text-base font-bold uppercase tracking-[0.1em]">Aprenda</h2>
+              <ul className="flex flex-col">
+                {externalLinks.map((link) => (
+                  <li key={link.href}>
+                    <a href={link.href} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                      {link.label}
+                      <span className="sr-only"> (abre em nova aba)</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
         </div>
-        <nav aria-label="Links externos">
-          <h2 className="mb-3 font-mono text-lg font-bold">Explore</h2>
-          <ul className="flex flex-col gap-2">
-            {externalLinks.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                >
-                  {link.label}
-                  <span className="sr-only"> (abre em nova aba)</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </PageContainer>
-      <PageContainer className="border-t border-border py-6">
-        <p className="text-sm text-muted-foreground">© {year} NFT Marketplace. Dados fictícios.</p>
+
+        <div className="border-t border-border py-6">
+          <p className="text-sm text-muted-foreground">© {year} Kurio. Dados fictícios.</p>
+        </div>
       </PageContainer>
     </footer>
   )

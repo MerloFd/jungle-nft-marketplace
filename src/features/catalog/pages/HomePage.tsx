@@ -81,7 +81,7 @@ export function HomePage() {
 
       <FeaturedSection />
 
-      <section aria-labelledby="catalog-title" className="flex flex-col gap-6">
+      <section id="catalogo" aria-labelledby="catalog-title" style={{ scrollMarginTop: 96 }} className="flex flex-col gap-6">
         <h2 id="catalog-title" className="text-2xl font-semibold">
           Catálogo
         </h2>
