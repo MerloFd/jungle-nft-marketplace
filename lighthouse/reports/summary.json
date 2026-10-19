@@ -1,0 +1,54 @@
+[
+  {
+    "page": "inicio",
+    "profile": "mobile",
+    "performance": 87,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100,
+    "lcp": 3784.1215,
+    "cls": 0.03656740697687936,
+    "tbt": 48,
+    "version": "13.5.0",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"
+  },
+  {
+    "page": "detalhe",
+    "profile": "mobile",
+    "performance": 89,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100,
+    "lcp": 3460.182799999999,
+    "cls": 0,
+    "tbt": 45,
+    "version": "13.5.0",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"
+  },
+  {
+    "page": "inicio",
+    "profile": "desktop",
+    "performance": 99,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100,
+    "lcp": 897.8447500000001,
+    "cls": 0.02004697288874802,
+    "tbt": 0,
+    "version": "13.5.0",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"
+  },
+  {
+    "page": "detalhe",
+    "profile": "desktop",
+    "performance": 86,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100,
+    "lcp": 1980.9884000000002,
+    "cls": 0.016459458324118513,
+    "tbt": 10,
+    "version": "13.5.0",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"
+  }
+]

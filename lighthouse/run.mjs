@@ -10,7 +10,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
 import lighthouse from 'lighthouse'
-import { desktopConfig } from 'lighthouse/core/config/desktop-config.js'
+import desktopConfig from 'lighthouse/core/config/desktop-config.js'
 import * as chromeLauncher from 'chrome-launcher'
 import { CATEGORIES, PAGES, RUNS, TARGETS } from './config.mjs'
 

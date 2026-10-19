@@ -263,13 +263,60 @@ isolado. As fixtures (`tests/e2e/support/app.ts`) expõem `login`, `addFirstNftT
 Metas do enunciado (mediana de 3 medições): desempenho ≥ 90, acessibilidade ≥ 95, boas práticas ≥ 95,
 SEO ≥ 90.
 
-> _A preencher com a saída de `npm run lighthouse` (relatórios em `lighthouse/reports/`)._
+**Condições**: Lighthouse 13.5.0, HeadlessChrome 155, Windows 10.0.26300, 12 CPUs, Node v24.21.0.
+Build otimizado (`vite build` + `vite preview`), cenário de mocks `default`, 3 execuções por página e
+perfil. Relatórios HTML e JSON de cada execução em `lighthouse/reports/`.
+
+| Página | Perfil | Performance | A11y | Best Practices | SEO | LCP | CLS | TBT |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| início | mobile | 87 | 100 | 100 | 100 | 3784ms | 0.037 | 48ms |
+| detalhe | mobile | 89 | 100 | 100 | 100 | 3460ms | 0.000 | 45ms |
+| início | desktop | 99 | 100 | 100 | 100 | 898ms | 0.020 | 0ms |
+| detalhe | desktop | 86 | 100 | 100 | 100 | 1981ms | 0.016 | 10ms |
+
+**Acessibilidade, boas práticas e SEO atingem 100 nas quatro medições.**
+
+### Por que performance fica abaixo de 90 em três medições
+
+A causa é o próprio requisito de entrega. O enunciado exige que a versão publicada funcione com os
+mocks e o tempo real, então o build de demonstração carrega a camada MSW (≈483kB, 177kB comprimido) e
+**espera o worker iniciar antes de renderizar qualquer coisa** — a aplicação é importada só depois do
+`await startMocks()`, pela razão descrita em [docs/DECISOES.md](docs/DECISOES.md#6-por-que-a-aplicação-carrega-depois-do-msw).
+Isso empurra o LCP para depois do boot do service worker, e o efeito é maior no perfil mobile, que o
+Lighthouse mede com CPU e rede limitadas.
+
+O que isso **não** é: não é peso de imagem (CLS fica em 0.000–0.037, bem abaixo do limite) nem
+bloqueio de thread (TBT máximo de 48ms, contra um limite de 200ms). O custo está concentrado no
+tempo até a primeira pintura, e vem do mock.
+
+Num cenário com API real, a camada MSW sairia do bundle de produção e esses números subiriam sem
+nenhuma mudança no código da aplicação. Nenhuma otimização foi feita exclusivamente para a auditoria:
+as medições carregam as mesmas imagens, fontes e funcionalidades da entrega.
 
 ---
 
 ## O que ficou de fora, e por quê
 
-> _A preencher ao fim da implementação._
+**Composição visual ainda não é fiel ao Figma.** Os tokens — paleta, escala tipográfica, raios e
+grade — foram lidos do arquivo e aplicados, e a identidade visual está correta. O **arranjo** das
+telas não: o Figma tem um hero com imagem e navegação própria (Início/Mercado/Criadores/Aprenda com
+busca), cards reduzidos a imagem, nome e preço, e uma barra lateral de filtros com contagem por
+coleção e faixa de preço com slider. A implementação entrega a mesma informação num arranjo próprio.
+Foi uma escolha de prioridade: com o prazo apertado, preferi garantir os critérios eliminatórios
+(testes E2E executáveis, compra confirmada pela API, isolamento entre usuários) a aproximar pixels.
+
+**A família tipográfica não foi confirmada.** O arquivo do Figma amarra a fonte a uma variável
+`font/family` que o modo de visualização não resolve. A interface é monoespaçada no desenho, e o
+projeto usa Space Mono — a correspondência mais próxima disponível. Trocar é alterar uma linha em
+`src/index.css`.
+
+**Cores de estado são inferência.** O Figma não define erro, sucesso e aviso. Os valores em uso foram
+escolhidos para conviver com a paleta âmbar e passar nos limites de contraste. Estão marcados como
+**INFERIDO** em [docs/figma/TOKENS.md](docs/figma/TOKENS.md).
+
+**Performance abaixo da meta em três medições**, pela razão analisada na seção anterior.
+
+**Sem backend real.** Tudo é simulado no navegador; a "blockchain" é uma função que sorteia um hash.
 
 ---
 
