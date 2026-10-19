@@ -48,6 +48,18 @@ function settle(orderId: string) {
   publishOrderUpdated(order)
 }
 
+/**
+ * O agendamento de `settle` vive em memória (setTimeout): um F5 durante o pedido
+ * pendente mata o timer e o pedido ficaria pendente para sempre. Como "recuperar
+ * o pedido após refresh/reconexão" é requisito, a liquidação também acontece de
+ * forma preguiçosa na leitura, assim que o tempo de confirmação já passou.
+ */
+function settleIfDue(order: DbOrder) {
+  if (order.status !== 'pending') return
+  if (Date.parse(order.createdAt) + SETTLEMENT_MS > Date.now()) return
+  settle(order.id)
+}
+
 export const orderHandlers = [
   http.post(`${API}/orders`, async ({ request }) => {
     const fail = await network()
@@ -151,6 +163,7 @@ export const orderHandlers = [
     const order = db().orders[String(params.orderId)]
     if (!order) return notFound('Pedido')
     if (order.userId !== userId) return apiError(403, 'FORBIDDEN', 'Este pedido pertence a outro usuário')
+    settleIfDue(order)
     return json(publicOrder(order))
   }),
 
@@ -161,10 +174,11 @@ export const orderHandlers = [
     const userId = requireUser(request)
     if (userId instanceof Response) return userId
     const key = new URL(request.url).searchParams.get('idempotencyKey')
-    const items = Object.values(db().orders)
+    const mine = Object.values(db().orders)
       .filter((o) => o.userId === userId && (!key || o.idempotencyKey === key))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map(publicOrder)
+    for (const o of mine) settleIfDue(o)
+    const items = mine.map(publicOrder)
     return json({ items })
   }),
 ]

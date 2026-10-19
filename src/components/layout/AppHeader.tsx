@@ -83,7 +83,7 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
       <PageContainer className="flex h-[72px] items-center justify-between gap-4 md:h-[88px]">
         <Logo renderLink={renderLink} />
 
-        <nav aria-label="Principal" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
           {renderLink('/', 'Marketplace', navLink)}
           <CartLink count={cartCount} renderLink={renderLink} />
           {sessionLoading ? (
@@ -118,7 +118,7 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
           )}
         </nav>
 
-        <div className="flex items-center gap-1 md:hidden">
+        <div className="flex items-center gap-1 lg:hidden">
           <CartLink count={cartCount} renderLink={renderLink} className="px-3" />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
