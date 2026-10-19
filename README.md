@@ -254,8 +254,9 @@ npx playwright test --project=desktop
 npx playwright test --project=mobile
 ```
 
-Cada teste começa por `app.boot(rota, cenário)`, que chama `window.__mock.reset()` e garante estado
-isolado. As fixtures (`tests/e2e/support/app.ts`) expõem `login`, `addFirstNftToCart`,
+A suíte tem **86 testes passando e 2 em `fixme`**, nos dois viewports, incluindo regressão visual de
+início, detalhe, carrinho e pagamento com baselines versionadas. Cada teste começa por
+`app.boot(rota, cenário)`, que chama `window.__mock.reset()` e garante estado isolado. As fixtures (`tests/e2e/support/app.ts`) expõem `login`, `addFirstNftToCart`,
 `waitForSocket`, `waitForIdle`, `cartBadge` e `announced`.
 
 ---
@@ -299,13 +300,18 @@ as medições carregam as mesmas imagens, fontes e funcionalidades da entrega.
 
 ## O que ficou de fora, e por quê
 
-**Composição visual ainda não é fiel ao Figma.** Os tokens (paleta, escala tipográfica, raios e
-grade) foram lidos do arquivo e aplicados, e a identidade visual está correta. O **arranjo** das
-telas não: o Figma tem um hero com imagem e navegação própria (Início/Mercado/Criadores/Aprenda com
-busca), cards reduzidos a imagem, nome e preço, e uma barra lateral de filtros com contagem por
-coleção e faixa de preço com slider. A implementação entrega a mesma informação num arranjo próprio.
-Foi uma escolha de prioridade: com o prazo apertado, preferi garantir os critérios eliminatórios
-(testes E2E executáveis, compra confirmada pela API, isolamento entre usuários) a aproximar pixels.
+**Composição parcialmente fiel ao Figma.** Os tokens (paleta, escala tipográfica, raios e grade)
+foram lidos do arquivo e aplicados. Do arranjo, estão fiéis o cabeçalho (marca KURIO, navegação
+centralizada com item ativo sublinhado, busca, carrinho com contador, botão Entrar com rótulo
+escuro), o divisor do cabeçalho, o hero (sobretítulo com tracking, H1 em caixa alta de 43/70,
+parágrafo, botão EXPLORAR, bolinhas de carrossel que trocam o destaque de verdade, imagem à direita)
+e o card de NFT reduzido a imagem, nome e preço em destaque.
+
+Ficaram de fora a barra lateral de filtros no formato do arquivo (Coleções e Rede com contagem,
+faixa de preço com slider, banner de oferta limitada), as abas da barra de ferramentas da grade e o
+estilo numerado da paginação. A informação está toda na tela, em arranjo próprio. Foi escolha de
+prioridade: garantir primeiro os critérios eliminatórios, que são testes E2E executáveis, compra
+confirmada pela API e isolamento entre usuários.
 
 **A família tipográfica não foi confirmada.** O arquivo do Figma amarra a fonte a uma variável
 `font/family` que o modo de visualização não resolve. A interface é monoespaçada no desenho, e o

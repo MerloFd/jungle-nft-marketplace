@@ -14,7 +14,7 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { ActiveFilterChips } from '../components/ActiveFilterChips'
 import { CatalogFilters } from '../components/CatalogFilters'
 import { CatalogSearchField } from '../components/CatalogSearchField'
-import { FeaturedSection } from '../components/FeaturedSection'
+import { HomeHero } from '../components/HomeHero'
 import { NftCard, NftCardSkeleton } from '../components/NftCard'
 import { useMediaQuery, useNftList } from '../hooks'
 import { CATALOG_PAGE_SIZE, type CatalogSearch } from '../search'
@@ -70,16 +70,7 @@ export function HomePage() {
 
   return (
     <PageContainer className="flex flex-col gap-12 py-10">
-      <section className="flex flex-col gap-4">
-        <h1 className="text-3xl font-semibold leading-tight md:text-5xl">
-          Descubra, colecione e venda <span className="text-accent-text">NFTs extraordinários</span>
-        </h1>
-        <p className="max-w-2xl text-muted-foreground md:text-lg">
-          Explore o catálogo completo, filtre por categoria e preço e acompanhe as mudanças de preço e estoque em tempo real.
-        </p>
-      </section>
-
-      <FeaturedSection />
+      <HomeHero />
 
       <section id="catalogo" aria-labelledby="catalog-title" style={{ scrollMarginTop: 96 }} className="flex flex-col gap-6">
         <h2 id="catalog-title" className="text-2xl font-semibold">

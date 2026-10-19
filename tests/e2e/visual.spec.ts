@@ -26,7 +26,7 @@ function mascaras(page: Page): Locator[] {
 }
 
 test.describe('regressão visual', () => {
-  test.fixme('início', async ({ page, app }) => {
+  test('início', async ({ page, app }) => {
     await app.boot('/', 'fast')
     await expect(page.getByTestId('catalog')).toBeVisible()
     await preparar(page, app)
@@ -34,7 +34,7 @@ test.describe('regressão visual', () => {
     await expect(page).toHaveScreenshot('inicio.png', { fullPage: true, mask: mascaras(page) })
   })
 
-  test.fixme('detalhe', async ({ page, app }) => {
+  test('detalhe', async ({ page, app }) => {
     await app.boot('/nft/nft-01', 'fast')
     await expect(page.getByTestId('nft-detail')).toBeVisible()
     await preparar(page, app)
@@ -42,7 +42,7 @@ test.describe('regressão visual', () => {
     await expect(page).toHaveScreenshot('detalhe.png', { fullPage: true, mask: mascaras(page) })
   })
 
-  test.fixme('carrinho', async ({ page, app }) => {
+  test('carrinho', async ({ page, app }) => {
     await app.boot('/nft/nft-01', 'fast')
     await expect(page.getByTestId('nft-detail')).toBeVisible()
     await page.getByTestId('add-to-cart').click()
@@ -55,7 +55,7 @@ test.describe('regressão visual', () => {
     await expect(page).toHaveScreenshot('carrinho.png', { fullPage: true, mask: mascaras(page) })
   })
 
-  test.fixme('pagamento', async ({ page, app }) => {
+  test('pagamento', async ({ page, app }) => {
     await irAteRevisao(page, app, { scenario: 'fast' })
     await preparar(page, app)
 
