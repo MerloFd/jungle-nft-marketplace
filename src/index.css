@@ -2,68 +2,77 @@
 @import "tw-animate-css";
 
 /*
- * Tokens de design. Troque os valores aqui para ajustar ao Figma.
+ * Tokens de design, lidos do Figma "Frontend Challenge" (marca na tela: KURIO).
+ * Os nomes dos estilos do arquivo estão anotados em cada linha, e a origem de
+ * cada valor (lido do painel x inferido) está em docs/figma/TOKENS.md.
  *
- * Contraste (WCAG) conferido sobre --background #2B2B2B:
- *  - --foreground #FFFFFF ........ 14.1:1
- *  - --muted-foreground #CCCCCC .. 8.8:1 (AA/AAA texto normal)
- *  - --accent-text #B98AFF ....... 5.5:1 (links/texto em destaque)
- *  - --brand #A259FF ............. 3.6:1 (apenas elementos grandes/decorativos, foco, bordas)
- *  - --primary #8B3DFF + branco .. 5.0:1 (botões; #A259FF + branco seria 3.9:1, abaixo de AA)
- *  - --destructive #D93838 + branco 4.6:1 / --destructive-text #FF6B6B 5.1:1
+ * Contraste (WCAG) conferido sobre --background #140D0A:
+ *  - --foreground #F5F1EB ........ 16.6:1
+ *  - --muted-foreground #CFB28C .. 10.2:1 (AA/AAA texto normal)
+ *  - --accent-text #E89B55 ....... 7.6:1 (preços e links)
+ *  - --primary #D28A4C + ink ..... 8.9:1 (botões: texto ESCURO sobre o âmbar)
+ *  Sobre --card #241612 os mesmos pares perdem ~1 ponto e seguem acima de 4.5:1.
  */
 :root {
-  --radius: 1.25rem;
+  /* raio: card 15px e botão 6px vieram do Figma */
+  --radius: 0.9375rem;
 
-  --background: #2b2b2b;
-  --foreground: #ffffff;
+  --background: #140d0a; /* color/ink */
+  --foreground: #f5f1eb; /* color/foreground */
 
-  --card: #3b3b3b;
-  --card-foreground: #ffffff;
-  --popover: #3b3b3b;
-  --popover-foreground: #ffffff;
+  --card: #241612; /* color/surface-card */
+  --card-foreground: #f5f1eb;
+  --popover: #241612;
+  --popover-foreground: #f5f1eb;
 
-  --brand: #a259ff;
-  --primary: #8b3dff;
-  --primary-hover: #7a2ef0;
-  --primary-foreground: #ffffff;
+  --brand: #d28a4c; /* color/primary */
+  --primary: #d28a4c; /* color/primary */
+  --primary-hover: #c07c42; /* INFERIDO: primary escurecido para hover */
+  --primary-foreground: #140d0a; /* o rótulo do botão é ink, não branco */
 
-  --secondary: #3b3b3b;
-  --secondary-foreground: #ffffff;
+  --secondary: #241612;
+  --secondary-foreground: #f5f1eb;
 
-  --muted: #3b3b3b;
-  --muted-foreground: #cccccc;
+  --muted: #241612;
+  --muted-foreground: #cfb28c; /* color/text-secondary */
 
-  --accent: #4a4a4a;
-  --accent-foreground: #ffffff;
-  --accent-text: #b98aff;
+  --accent: #32201a; /* INFERIDO: superfície de hover entre card e borda */
+  --accent-foreground: #f5f1eb;
+  --accent-text: #e89b55; /* color/text-accent (preços) */
 
-  --destructive: #d93838;
-  --destructive-foreground: #ffffff;
-  --destructive-text: #ff6b6b;
+  /* INFERIDO: o Figma não expõe cores de estado; derivadas para conviver com o âmbar e passar em contraste */
+  --destructive: #c2452f;
+  --destructive-foreground: #f5f1eb;
+  --destructive-text: #f08a72;
 
-  --success: #2fb36b;
-  --success-text: #4ade80;
-  --warning: #f5a524;
-  --warning-text: #fbbf24;
+  --success: #2f8f5b;
+  --success-text: #6ed79b;
+  --warning: #c98a24;
+  --warning-text: #f0b858;
 
-  --border: #4a4a4a;
-  --border-strong: #858584;
-  --input: #858584;
-  --ring: #a259ff;
+  --border: #3a251c; /* INFERIDO: borda neutra da família do card */
+  --border-strong: #d28a4c; /* o divisor do cabeçalho é color/primary */
+  --input: #3a251c;
+  --ring: #d28a4c;
 
-  --skeleton-base: #3b3b3b;
-  --skeleton-highlight: #4d4d4d;
+  --skeleton-base: #241612;
+  --skeleton-highlight: #32201a;
 }
 
 @theme inline {
-  --font-sans: "Work Sans Variable", "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  /*
+   * O Figma prende a família a uma variável (font/family) que o painel não
+   * resolve sem Dev Mode, mas o desenho é monoespaçado em toda a interface:
+   * títulos, navegação, corpo e preços. Space Mono é a correspondência mais
+   * próxima e já estava no projeto. Trocar aqui troca a interface inteira.
+   */
+  --font-sans: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --radius-sm: calc(var(--radius) - 0.75rem);
-  --radius-md: calc(var(--radius) - 0.5rem);
-  --radius-lg: calc(var(--radius) - 0.25rem);
-  --radius-xl: var(--radius);
+  --radius-sm: 0.375rem; /* 6px: botões e campos, como no Figma */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: var(--radius); /* 15px: cards e imagens */
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);

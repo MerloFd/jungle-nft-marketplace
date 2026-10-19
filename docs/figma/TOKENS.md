@@ -22,9 +22,13 @@ Confira as linhas LIDO por garantia, mas o foco da sua revisão são as linhas *
 | `color/primary` | `#D28A4C` | LIDO | preenchimento do `Login Button` (botão "Entrar") |
 | `color/foreground` | `#F5F1EB` | LIDO | texto "Bem-vindo à Kurio" |
 | `color/text-secondary` | `#CFB28C` | LIDO | parágrafo do hero ("Descubra NFTs selecionados…") |
-| superfície de card | — | **FALTA LER** | precisa selecionar um card de NFT |
-| borda / divisor | — | **FALTA LER** | linha abaixo do cabeçalho (`Line 1`) |
-| estados (sucesso / erro / aviso) | — | **FALTA LER** | provavelmente só aparecem nas telas de pagamento e confirmação |
+| `color/surface-card` | `#241612` | LIDO | `Rectangle 6`, fundo do card de NFT na grade |
+| `color/text-accent` | `#E89B55` | LIDO | preço "1.19 ETH" no card |
+| divisor do cabeçalho | `color/primary` a 0.3px | LIDO | `Line 1`, abaixo do cabeçalho |
+| borda neutra | `#3A251C` | **INFERIDO** | derivada da família do card; o Figma só usa o divisor âmbar |
+| hover de superfície | `#32201A` | **INFERIDO** | entre card e borda |
+| hover do primário | `#C07C42` | **INFERIDO** | primário escurecido |
+| erro / sucesso / aviso | `#C2452F` / `#2F8F5B` / `#C98A24` | **INFERIDO** | o arquivo não expõe cores de estado; escolhidas para conviver com o âmbar e passar em contraste |
 
 Observação importante: os nomes dos estilos (`color/ink`, `color/primary`, `color/foreground`,
 `color/text-secondary`) são os nomes reais do arquivo. Vou usar exatamente esses nomes como
@@ -39,6 +43,7 @@ tokens no `src/index.css`, para o CSS ficar rastreável ao Figma.
 | `Body Large/16 Medium` | 16px / 100% | 500 | 0% | LIDO | rótulo "Entrar" |
 | `Body/14 Regular` | 14px / 24px | 400 | 0% | LIDO | parágrafo do hero |
 | `Body/14 Medium` | 14px / 16px | 500 | **10%** | LIDO | sobretítulo "Bem-vindo à Kurio" |
+| `Body Large/18 Bold` | 18px / 16px | 700 | 0% | LIDO | preço no card de NFT |
 | família tipográfica | `font/family` (variável) | — | — | **NÃO RESOLVIDO** | o painel mostra o nome da variável, não a fonte |
 
 **A família é o buraco da leitura.** O arquivo prende a fonte a uma variável chamada `font/family`
@@ -59,7 +64,11 @@ e veja o painel de tipografia, ou me diga o que aparece em `font/family`).
 | gap interno da seção `Top` | 32px | LIDO | seção `Top` |
 | raio do botão | 6px | LIDO | `Login Button` |
 | altura do botão | 35px | LIDO | `Login Button` |
-| raio dos cards | — | **FALTA LER** | |
+| raio da imagem do card | 15px | LIDO | `NFT Artwork 03` (250×250) |
+| card de NFT | 258 × 300 | LIDO | `Rectangle 6` |
+| barra lateral de filtros | 310px, gap interno 24px | LIDO | `Sidebar` |
+| gap entre barra lateral e grade | 48px | LIDO | `Products` |
+| frame mobile | 414 × 896, padding lateral **24px**, gap 16px | LIDO | `Mobile / Início` |
 
 > Impacto direto: hoje o `PageContainer` usa `max-w-[1280px]` com `px-[115px]`.
 > O correto é conteúdo de **1200px** com **120px** de padding lateral no desktop.
@@ -83,11 +92,17 @@ e veja o painel de tipografia, ou me diga o que aparece em `font/family`).
 - Telas no arquivo (desktop e mobile): Início, Detalhes do NFT, Carrinho de NFTs, Pagamento,
   Confirmação de Pedido, Login, Cadastro, Perfil do Colecionador, Carteiras.
 
-## 6. O que ainda falta ler
+## 6. O que já foi aplicado no código
 
-1. Cor de superfície dos cards e das caixas de formulário.
-2. Cor da borda/divisor.
-3. Raio dos cards e dos campos de formulário.
-4. Família tipográfica (bloqueada pela variável).
-5. Breakpoint mobile: largura dos frames `Mobile / *` e padding lateral.
-6. Cores de estado (pendente / confirmado / recusado) nas telas de Pagamento e Confirmação.
+- `src/index.css`: todos os tokens acima, com o nome do estilo do Figma anotado em cada linha.
+  Atenção a um detalhe que muda o visual inteiro: o texto sobre o botão primário é **ink escuro**
+  (`#140D0A`), não branco.
+- `src/index.css`: escala de raios 6px (controles) / 15px (cards).
+- `src/index.css`: tipografia monoespaçada em toda a interface (ver a ressalva da família acima).
+- `src/components/layout/PageContainer.tsx`: conteúdo de 1200px centrado, 24px de padding no mobile.
+
+## 7. O que ainda falta ler
+
+1. Família tipográfica (bloqueada pela variável `font/family` — **preciso de você**).
+2. Cores de estado do pedido (pendente / confirmado / recusado) nas telas de Pagamento e Confirmação.
+3. Medidas internas das telas de Detalhe, Carrinho, Pagamento, Login, Perfil e Carteiras.
