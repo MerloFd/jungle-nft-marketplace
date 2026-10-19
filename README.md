@@ -1,0 +1,235 @@
+# NFT Marketplace — desafio frontend Jungle Gaming
+
+Marketplace de NFTs em React + TypeScript, com backend simulado (REST e tempo real), fluxo de compra
+completo com idempotência, estados de carregamento/vazio/erro em toda tela com dados e testes E2E.
+
+- **Arquitetura e contratos**: [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Decisões explicadas** (material de estudo): [docs/DECISOES.md](docs/DECISOES.md)
+- **Tokens lidos do Figma**: [docs/figma/TOKENS.md](docs/figma/TOKENS.md)
+- **Convenção de seletores e estados**: [docs/TESTIDS.md](docs/TESTIDS.md)
+
+---
+
+## Como rodar
+
+```bash
+npm install
+npm run dev          # http://localhost:5173 com os mocks ligados
+```
+
+| Comando | O que faz |
+| --- | --- |
+| `npm run dev` | desenvolvimento na 5173, mocks ligados |
+| `npm run typecheck` | TypeScript estrito, sem emitir |
+| `npm run build` | build de produção (mocks incluídos, é uma demonstração) |
+| `npm run preview` | serve o build na 4173 |
+| `npm run test:e2e` | Playwright; sobe build e preview sozinho |
+| `npm run test:e2e:report` | abre o relatório HTML da última execução |
+| `npm run lighthouse` | com o preview na 4173: 3 medições por página e perfil |
+
+### Variáveis de ambiente
+
+| Variável | Valor | Efeito |
+| --- | --- | --- |
+| `VITE_ENABLE_MOCKS` | `true` / `false` | liga a camada de mocks (MSW + Socket.IO). Já vem `true` em `.env.development` e `.env.production` |
+
+Não há API real: com `VITE_ENABLE_MOCKS=false` a aplicação sobe, mas toda chamada falha. O valor
+`true` no build de produção é intencional — é o que faz a demonstração publicada funcionar.
+
+### Credenciais de teste
+
+| E-mail | Senha |
+| --- | --- |
+| `ana@jungle.dev` | `jungle123` |
+| `bruno@jungle.dev` | `jungle123` |
+
+Os dois usuários existem para demonstrar o isolamento de dados: favoritos, carrinho, carteiras e
+pedidos de um não aparecem para o outro.
+
+### Cupons
+
+| Código | Efeito |
+| --- | --- |
+| `JUNGLE10` | 10% de desconto |
+| `WELCOME5` | 5% de desconto |
+| `EXPIRED20` | expirado (erro `COUPON_EXPIRED`) |
+| qualquer outro | inválido (erro `COUPON_INVALID`) |
+
+---
+
+## Stack e onde cada tecnologia participa
+
+| Tecnologia | Papel concreto no projeto |
+| --- | --- |
+| **React 19 + TypeScript** | toda a interface, em modo estrito, sem `any` e sem `@ts-ignore` |
+| **TanStack Router** | rotas por arquivo em `src/routes/`; `validateSearch` com Zod põe busca, filtros, ordenação e página na URL; `beforeLoad` protege checkout, pedido e conta |
+| **TanStack Query** | todo o estado de servidor: cache, revalidação, retry seletivo, atualização otimista, invalidação por evento |
+| **Axios** | instância única em `src/lib/http.ts` com token, `X-Guest-Id`, normalização de erro e detecção de sessão expirada |
+| **Zod** | `src/contracts/` é a fonte única de tipos: valida toda resposta na borda e também os formulários |
+| **Socket.IO** | `src/realtime/`: cliente real, com dedupe por evento e versão, filtro por usuário e reconciliação na reconexão |
+| **Tailwind CSS v4** | tokens em `src/index.css` (`@theme inline`), lidos do Figma; nenhum componente usa cor literal |
+| **shadcn/ui** | `src/components/ui/`, escrito à mão sobre Radix (diálogo, sheet, select, tabs, campo, paginação…) |
+| **MSW** | `src/mocks/`: REST + Socket.IO, 16 cenários determinísticos, ativado por configuração |
+| **Playwright** | `tests/e2e/`, projetos desktop (1440×900) e mobile (390×844) |
+| **Lighthouse** | `lighthouse/run.mjs`: 3 medições por página e perfil, com mediana e metas versionadas |
+| **decimal.js** | aritmética de ETH sem perda de precisão (`src/lib/money.ts`) |
+
+---
+
+## Contratos REST
+
+Resumo. A tabela completa, com entradas, saídas e códigos de erro, está em
+[ARCHITECTURE.md](ARCHITECTURE.md#2-contratos-rest).
+
+| Grupo | Rotas |
+| --- | --- |
+| Sessão | `POST /auth/register` · `POST /auth/login` · `GET /auth/session` · `POST /auth/logout` |
+| Catálogo | `GET /nfts` (busca, filtros, ordenação, paginação) · `GET /nfts/featured` · `GET /nfts/:id` |
+| Favoritos | `GET /favorites` · `PUT/DELETE /favorites/:nftId` |
+| Carrinho | `GET/PATCH /cart` · `POST /cart/items` · `PATCH/DELETE /cart/items/:id` · `POST /cart/acknowledge` · `POST/DELETE /cart/coupon` · `POST /cart/merge` |
+| Cotação | `POST /quotes` · `POST /quotes/:id/validate` · `GET /quotes/:id` |
+| Pedido | `POST /orders` (`Idempotency-Key`) · `GET /orders/:id` · `GET /orders?idempotencyKey=` |
+| Conta | `GET/PATCH /profile` · `POST /profile/avatar` · `POST /profile/password` · `GET/POST /wallets` · `PATCH /wallets/:id` · `GET /wallets/connection` · `POST /wallets/:id/connect` · `POST /wallets/:id/disconnect` |
+
+Erros têm formato único: `{ error: { code, message, fields?, details? } }`. O campo `fields` é o que
+permite mostrar a mensagem no campo certo do formulário.
+
+**Eventos**: `nft.updated` (preço e disponibilidade, para todos) e `order.updated` (status do pedido,
+só para o dono). Ambos carregam `eventId` e `version`.
+
+---
+
+## Cache, retry e sincronização
+
+| Decisão | Valor | Porquê |
+| --- | --- | --- |
+| `staleTime` padrão | 30s | o catálogo muda pouco e os eventos mantêm preço e estoque frescos |
+| dados privados | 0 | perfil e carteiras refletem a última escrita |
+| retry de query | até 2x, só em erro transitório (rede, timeout, 5xx), backoff exponencial | repetir um 4xx só reproduz o mesmo erro |
+| retry de mutation | nenhum automático | só o pedido reenvia, e sempre com a mesma `Idempotency-Key` |
+| após mutation de carrinho | a resposta substitui o cache | a API já devolve o carrinho completo e o resumo correto |
+| favoritos | otimista com rollback | é a interação em que a latência mais incomoda |
+| corridas | `signal` do Query cancela a requisição anterior | resposta de busca antiga não sobrescreve a atual |
+| reconexão | invalida as queries **ativas** | o REST diz o estado atual; não se tenta recuperar eventos perdidos |
+| pedido pendente | polling curto além do socket | o tempo real deixa de ser ponto único de falha |
+
+---
+
+## Cenários de mock
+
+Seleção por `?scenario=<nome>` na URL, pelo painel de cenários (canto inferior esquerdo) ou por
+`window.__mock.setScenario()`.
+
+| Cenário | O que exercita |
+| --- | --- |
+| `default` | latência realista (150–400ms) |
+| `fast` | sem latência (usado pelos testes) |
+| `slow` | 2,5s por requisição — skeletons |
+| `variable` | latência de 100ms a 2s, gera respostas fora de ordem |
+| `empty` | catálogo sem resultados |
+| `offline` | sem conexão com a API |
+| `server-error` | catálogo responde 500 |
+| `flaky` | a 1ª consulta falha (503), a nova tentativa funciona |
+| `favorites-error` | falha ao favoritar — rollback do otimista |
+| `session-expired` | sessão expira na próxima requisição autenticada |
+| `price-change` | preço muda durante o checkout |
+| `sold-out` | edição esgota durante o checkout |
+| `order-timeout` | timeout após criar o pedido — recuperação por idempotência |
+| `payment-declined` | pagamento recusado |
+| `wallet-rejects` | carteira recusa a conexão |
+| `socket-drop` | conexão em tempo real cai com o pedido pendente |
+
+A latência variável usa um PRNG semeado, reiniciado no reset: a mesma sequência de requisições produz
+os mesmos atrasos. Os cenários são reprodutíveis, não aleatórios.
+
+### `window.__mock`
+
+Superfície de controle usada pelos testes e pela demonstração:
+
+| Função | Efeito |
+| --- | --- |
+| `reset()` | restaura o seed (catálogo, usuários, carrinhos, pedidos, carteiras) |
+| `setScenario(nome)` · `setLatencyFactor(n)` | troca o cenário / multiplica a latência |
+| `expireSessions()` | expira todas as sessões agora |
+| `updateEdition(nftId, editionId, { priceEth?, available? })` | muda preço/estoque no REST **e** emite `nft.updated` |
+| `emitDuplicateOfLast()` | reemite o último evento (testa dedupe) |
+| `emitStale('nft'\|'order', id)` | emite um evento com versão antiga (testa ordenação) |
+| `dropSockets()` · `connectedPeers()` | derruba as conexões / conta as abertas |
+| `disconnectWallet()` | desconecta a carteira |
+| `state()` | estado atual do backend simulado |
+
+`window.__realtimeStatus` expõe o estado do socket.
+
+---
+
+## Limitações do transporte Socket.IO sobre MSW
+
+1. **O caminho é `/realtime/`, não `/socket.io/`.** O MSW remove o prefixo `/socket.io/` antes de
+   comparar a URL e capturaria junto o WebSocket do HMR do Vite.
+2. **A aplicação é importada depois de o MSW iniciar.** O `engine.io-client` captura
+   `globalThis.WebSocket` ao carregar o módulo; avaliado antes do MSW, ele guardaria o WebSocket
+   original e escaparia da interceptação — o socket falharia em silêncio.
+3. **O heartbeat é manual**: o mock envia o ping do protocolo a cada 20s, senão o cliente cai por
+   ping timeout.
+4. A API publicada do `@mswjs/socket.io-binding` (0.2.0) é `toSocketIo(connection)`; o README do
+   repositório documenta uma API ainda não publicada.
+5. Sem servidor real não há difusão entre abas: cada aba tem o seu próprio mundo simulado.
+
+---
+
+## Testes
+
+```bash
+npm run test:e2e              # sobe build + preview e roda tudo
+npx playwright test --project=desktop
+npx playwright test --project=mobile
+```
+
+Cada teste começa por `app.boot(rota, cenário)`, que chama `window.__mock.reset()` e garante estado
+isolado. As fixtures (`tests/e2e/support/app.ts`) expõem `login`, `addFirstNftToCart`,
+`waitForSocket`, `waitForIdle`, `cartBadge` e `announced`.
+
+---
+
+## Resultados do Lighthouse
+
+Metas do enunciado (mediana de 3 medições): desempenho ≥ 90, acessibilidade ≥ 95, boas práticas ≥ 95,
+SEO ≥ 90.
+
+> _A preencher com a saída de `npm run lighthouse` (relatórios em `lighthouse/reports/`)._
+
+---
+
+## O que ficou de fora, e por quê
+
+> _A preencher ao fim da implementação._
+
+---
+
+## Uso de IA no desenvolvimento
+
+O projeto foi desenvolvido com Claude Code, e vale registrar **como**, porque o método influenciou a
+arquitetura.
+
+**Especificação antes de implementação.** O `CLAUDE.md` descreve arquitetura, regras eliminatórias e
+armadilhas já resolvidas; `src/contracts/` é o contrato executável que a interface, o cliente HTTP e
+os mocks compartilham; `docs/TESTIDS.md` fixa os seletores e os estados obrigatórios de tela. Esses
+documentos existiam antes do código que eles governam.
+
+**Implementação em paralelo com fronteiras explícitas.** Catálogo, carrinho/checkout e conta foram
+implementados simultaneamente por agentes distintos, cada um com um conjunto de escrita disjunto
+(suas próprias pastas) e proibidos de alterar o que é compartilhado (`contracts`, `lib`, `mocks`,
+`components/ui`). Durante a execução, nada compartilhado mudou — é o que impede um agente de trabalhar
+sobre uma versão desatualizada de um arquivo que outro acabou de reescrever. A verificação
+(`typecheck`, `build`, E2E) foi feita depois, em série.
+
+**Decisões técnicas foram revisadas, não aceitas.** Dois exemplos registrados no histórico: um agente
+identificou que o mock nunca liquidava um pedido pendente após um refresh (a confirmação era agendada
+com `setTimeout` em memória), o que tornava impossível o cenário obrigatório de recuperação; e outro
+apontou que o cabeçalho estourava 19px na largura de 768px. Ambos foram corrigidos à mão, com a razão
+registrada na mensagem de commit.
+
+**Os tokens visuais foram lidos, não estimados.** As cores, a escala tipográfica e a grade vieram do
+painel de propriedades do Figma, como texto. `docs/figma/TOKENS.md` marca cada valor como **LIDO** ou
+**INFERIDO**, e a família tipográfica está explicitamente registrada como não resolvida — o arquivo a
+prende a uma variável que o modo de visualização não expõe.
