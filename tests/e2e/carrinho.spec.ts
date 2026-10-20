@@ -66,7 +66,7 @@ test.describe('carrinho', () => {
     await expect(app.cartBadge()).toHaveText('1', { timeout: 25_000 })
 
     await page.goto('/cart')
-    await expect(page.getByTestId('cart')).toContainText('Aurora Digital')
+    await expect(page.getByTestId('cart')).toContainText('Emerald Ape #042')
 
     await app.login('ana')
     await page.goto('/cart')
@@ -74,6 +74,6 @@ test.describe('carrinho', () => {
     await expect(page.getByTestId('cart')).toBeVisible()
     await expect(app.cartBadge()).toHaveText('1', { timeout: 25_000 })
     await expect(page.locator('li[data-testid^="cart-item-"]')).toHaveCount(1)
-    await expect(page.getByTestId('cart')).toContainText('Aurora Digital')
+    await expect(page.getByTestId('cart')).toContainText('Emerald Ape #042')
   })
 })

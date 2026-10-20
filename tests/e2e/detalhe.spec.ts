@@ -5,7 +5,7 @@ test.describe('detalhe do NFT', () => {
     await app.boot('/nft/nft-01', 'fast')
 
     await expect(page.getByTestId('nft-detail')).toBeVisible()
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Aurora Digital')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Emerald Ape #042')
     await expect(page.getByTestId('nft-gallery')).toBeVisible()
     await expect(page.locator('[data-testid^="edition-"]')).not.toHaveCount(0)
     await expect(page.getByTestId('add-to-cart')).toBeEnabled()

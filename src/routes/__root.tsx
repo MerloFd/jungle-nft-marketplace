@@ -74,14 +74,8 @@ function RootLayout() {
                 },
               })
             }
-            renderLink={(to, children, className, ariaCurrent) => (
-              <Link
-                to={to}
-                className={className}
-                // ariaCurrent === false suprime o aria-current automático de rota:
-                // usado quando a tela controla o item ativo por scroll (ex.: home).
-                {...(ariaCurrent === false ? {} : { activeProps: { 'aria-current': 'page' } })}
-              >
+            renderLink={(to, children, className) => (
+              <Link to={to} className={className} activeProps={{ 'aria-current': 'page' }}>
                 {children}
               </Link>
             )}

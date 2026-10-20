@@ -256,7 +256,7 @@ npx playwright test --project=desktop
 npx playwright test --project=mobile
 ```
 
-A suíte tem **86 testes passando e 2 em `fixme`**, nos dois viewports, incluindo regressão visual de
+A suíte tem **93 testes passando e 2 em `fixme`**, nos dois viewports, incluindo regressão visual de
 início, detalhe, carrinho e pagamento com baselines versionadas. Cada teste começa por
 `app.boot(rota, cenário)`, que chama `window.__mock.reset()` e garante estado isolado. As fixtures (`tests/e2e/support/app.ts`) expõem `login`, `addFirstNftToCart`,
 `waitForSocket`, `waitForIdle`, `cartBadge` e `announced`.
@@ -302,18 +302,25 @@ as medições carregam as mesmas imagens, fontes e funcionalidades da entrega.
 
 ## O que ficou de fora, e por quê
 
-**Composição parcialmente fiel ao Figma.** Os tokens (paleta, escala tipográfica, raios e grade)
-foram lidos do arquivo e aplicados. Do arranjo, estão fiéis o cabeçalho (marca KURIO, navegação
-centralizada com item ativo sublinhado, busca, carrinho com contador, botão Entrar com rótulo
-escuro), o divisor do cabeçalho, o hero (sobretítulo com tracking, H1 em caixa alta de 43/70,
-parágrafo, botão EXPLORAR, bolinhas de carrossel que trocam o destaque de verdade, imagem à direita)
-e o card de NFT reduzido a imagem, nome e preço em destaque.
+**Composição fiel na maior parte da home; a barra lateral de filtros não reproduz o arranjo do
+Figma.** Tokens (paleta, escala tipográfica, raios, grade) lidos do arquivo e aplicados. Do arranjo:
+fiéis o cabeçalho (marca KURIO com o retrato do NFT em destaque como ícone, navegação com os 4 itens
+do Figma — Início, Mercado, Criadores, Aprenda —, item ativo sublinhado acompanhando a seção visível
+por scroll, busca, carrinho com contador, botão Entrar com rótulo escuro), o divisor do cabeçalho, o
+hero (sobretítulo com tracking, H1 em caixa alta de 43/70, parágrafo, botão EXPLORAR, bolinhas de
+carrossel que trocam o destaque de verdade, imagem real do NFT em destaque à direita), o card de NFT
+reduzido a imagem/nome/preço, e as duas seções entre a paginação e o rodapé (destaques em cartão
+duplo e o "Diário da Cunhagem" em 4 cards, com as imagens reais recortadas do Figma) — são os
+destinos de "Criadores" e "Aprenda": como a seção 3 do enunciado exclui páginas editoriais da
+entrega, os cartões compõem a tela mas as ações internas ("Explorar", "Ler mais") ficam
+`aria-disabled`, sem fingir levar a algum lugar. O rodapé também foi reconstruído fiel ao arquivo
+(faixa de 3 colunas + newsletter, barra de contato, 4 colunas de links), com cada link real quando
+existe tela por trás (perfil, carteiras, filtro por categoria) e `aria-disabled` quando não existe.
 
-Ficaram de fora a barra lateral de filtros no formato do arquivo (Coleções e Rede com contagem,
-faixa de preço com slider, banner de oferta limitada), as abas da barra de ferramentas da grade e o
-estilo numerado da paginação. A informação está toda na tela, em arranjo próprio. Foi escolha de
-prioridade: garantir primeiro os critérios eliminatórios, que são testes E2E executáveis, compra
-confirmada pela API e isolamento entre usuários.
+Ficaram de fora **só** a barra lateral de filtros no formato do arquivo (Coleções e Rede com
+contagem, faixa de preço com slider) e o estilo numerado da paginação — o catálogo usa os mesmos
+filtros, só num arranjo diferente (sheet no mobile, coluna no desktop, sem as contagens por
+categoria, que o contrato da API não expõe).
 
 **A família tipográfica não foi confirmada.** O arquivo do Figma amarra a fonte a uma variável
 `font/family` que o modo de visualização não resolve. A interface é monoespaçada no desenho, e o
@@ -324,7 +331,17 @@ projeto usa Space Mono, a correspondência mais próxima disponível. Trocar é 
 escolhidos para conviver com a paleta âmbar e passar nos limites de contraste. Estão marcados como
 **INFERIDO** em [docs/figma/TOKENS.md](docs/figma/TOKENS.md).
 
-**Performance abaixo da meta em três medições**, pela razão analisada na seção anterior.
+**Performance abaixo da meta em três medições**, pela razão analisada na seção anterior. Não foi
+reauditado depois dos ajustes finais de composição — a composição não deveria mudar o LCP (mesma
+causa: o boot do MSW), mas os números acima podem estar levemente desatualizados.
+
+**36 dos 40 NFTs do catálogo usam arte abstrata gerada**, não a arte do Figma. Quatro itens —
+"Emerald Ape #042", "Sage Nomad #009", "Neon Vessel #552" e "Golden Signal #160", todos em destaque —
+usam as imagens reais recortadas do arquivo, com nome e preço batendo com o que o Figma mostra. Os
+outros 36 eram originalmente um conjunto fictício com nomes próprios (ex. "Faixas do Silêncio") e não
+foram remapeados um a um para o catálogo do Figma — isso exigiria ver as 4 páginas do grid do arquivo,
+e só a primeira foi lida nesta sessão. Ver `docs/STACK.md` para a lista completa do que é real e do
+que é gerado.
 
 **Sem backend real.** Tudo é simulado no navegador; a "blockchain" é uma função que sorteia um hash.
 

@@ -64,7 +64,7 @@ export function MockPanel() {
           <div className="flex flex-col gap-2">
             <p className="font-semibold">Ações do servidor simulado</p>
             <Button variant="outline" className="h-auto whitespace-normal py-2.5 text-left" onClick={bumpPrice}>
-              Subir preço do NFT "Aurora Digital"
+              Subir preço do NFT "Emerald Ape #042"
             </Button>
             <Button variant="outline" className="h-auto whitespace-normal py-2.5 text-left" onClick={() => mock.dropSockets()}>
               Derrubar conexão em tempo real

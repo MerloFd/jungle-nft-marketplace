@@ -78,12 +78,15 @@ export function AppFooter() {
             </div>
           ))}
 
-          <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()} aria-describedby="newsletter-hint">
+          {/* aria-hidden: campo sem função real (ver docs/ESPECIFICACOES.md), fora da árvore de
+              acessibilidade para não colidir com o rótulo "E-mail" de formulários de verdade
+              em toda a aplicação (o rodapé é global). */}
+          <form aria-hidden="true" className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
             <h3 className="text-base font-bold">Antecipe-se ao próximo lançamento</h3>
             <div className="flex gap-2">
-              <label htmlFor="newsletter-email" className="sr-only">
-                E-mail
-              </label>
+              {/* Sem <label>: o formulário já é aria-hidden (não existe de fato), e um
+                  rótulo "E-mail" aqui colidiria com getByLabel(/e-?mail/i) de
+                  QUALQUER formulário real da aplicação, já que o rodapé é global. */}
               <input
                 id="newsletter-email"
                 type="email"
