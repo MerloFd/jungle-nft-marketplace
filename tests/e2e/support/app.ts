@@ -60,8 +60,10 @@ export const test = base.extend<{ app: AppFixture }>({
         const creds = USERS[user]
         if (!page.url().includes('/login')) await page.goto('/login')
         await page.getByTestId('login-form').waitFor()
-        await page.getByLabel(/e-?mail/i).fill(creds.email)
-        await page.getByLabel(/senha/i).fill(creds.password)
+        // getByRole('textbox'), não getByLabel: o botão de mostrar/ocultar
+        // senha também tem "senha" no aria-label e colidiria.
+        await page.getByRole('textbox', { name: /e-?mail/i }).fill(creds.email)
+        await page.getByRole('textbox', { name: /senha/i }).fill(creds.password)
         await page.getByRole('button', { name: /entrar/i }).click()
         await expect(page.getByTestId('login-form')).toBeHidden()
       },

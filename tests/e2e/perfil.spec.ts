@@ -90,7 +90,7 @@ test.describe('perfil', () => {
     await page.goto('/login')
     await expect(page.getByTestId('login-form')).toBeVisible()
     await page.getByLabel(/e-?mail/i).fill(USERS.ana.email)
-    await page.getByLabel(/senha/i).fill('novaSenha789')
+    await page.getByRole('textbox', { name: /senha/i }).fill('novaSenha789')
     await page.getByRole('button', { name: /entrar/i }).click()
     await expect(page.getByTestId('login-form')).toBeHidden()
   })

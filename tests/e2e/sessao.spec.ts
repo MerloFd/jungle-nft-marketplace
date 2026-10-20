@@ -17,7 +17,10 @@ test.describe('sessão', () => {
     await page.getByLabel('Nome', { exact: false }).first().fill('Ana Clone')
     await page.getByLabel(/nome de usuário/i).fill('anaclone')
     await page.getByLabel(/e-?mail/i).fill(USERS.ana.email)
-    await page.getByLabel(/senha/i).fill('jungle123')
+    // getByRole('textbox'), não getByLabel: o botão de mostrar/ocultar senha
+    // também tem "senha" no aria-label, e agora há dois campos de senha.
+    await page.getByRole('textbox', { name: /^senha$/i }).fill('jungle123')
+    await page.getByRole('textbox', { name: /confirmar senha/i }).fill('jungle123')
     await page.getByRole('button', { name: /criar conta/i }).click()
 
     const email = page.getByLabel(/e-?mail/i)

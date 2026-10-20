@@ -1,13 +1,14 @@
 import * as React from 'react'
-import { getRouteApi, Link } from '@tanstack/react-router'
+import { getRouteApi } from '@tanstack/react-router'
 import { LoginInput } from '@/contracts'
 import { isApiError } from '@/lib/http'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useAnnounce } from '@/components/ui/live-region'
+import { PasswordInput } from '@/components/ui/password-input'
 import { useLogin, useSession } from '@/features/session/session'
-import { AuthLayout } from '../components/AuthLayout'
+import { AuthModal } from '../components/AuthModal'
 import { apiErrors, focusFirstInvalid, useFormState, zodErrors } from '../form'
 import { useAfterAuthRedirect } from '../redirect'
 
@@ -50,11 +51,9 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout
-      title="Entrar"
-      description="Acesse sua conta para favoritar NFTs, usar o carrinho e finalizar compras."
-      notice={
-        search.reason === 'expired' ? (
+    <AuthModal mode="login" redirect={search.redirect} subtitle="Entre para gerenciar sua carteira, coleção e perfil de criador.">
+      <form ref={formRef} data-testid="login-form" noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {search.reason === 'expired' ? (
           <p
             data-testid="login-expired-notice"
             role="status"
@@ -62,22 +61,8 @@ export function LoginPage() {
           >
             Sua sessão expirou. Entre novamente para continuar de onde parou.
           </p>
-        ) : null
-      }
-      footer={
-        <>
-          Ainda não tem conta?{' '}
-          <Link
-            to="/register"
-            search={{ redirect: search.redirect }}
-            className="font-semibold text-accent-text underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            Criar conta
-          </Link>
-        </>
-      }
-    >
-      <form ref={formRef} data-testid="login-form" noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
+        ) : null}
+
         {formError ? (
           <p
             data-testid="login-error"
@@ -88,37 +73,46 @@ export function LoginPage() {
           </p>
         ) : null}
 
-        <Field label="E-mail" error={errors.email} required>
+        <Field label="E-mail" hideLabel error={errors.email} required>
           <Input
             type="email"
             name="email"
             autoComplete="email"
             inputMode="email"
-            placeholder="voce@exemplo.com"
+            placeholder="contato@email.com"
             value={values.email}
             onChange={(e) => set('email', e.target.value)}
           />
         </Field>
 
-        <Field label="Senha" error={errors.password} required>
-          <Input
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            value={values.password}
-            onChange={(e) => set('password', e.target.value)}
-          />
-        </Field>
+        <div className="flex flex-col gap-1.5">
+          <Field label="Senha" hideLabel error={errors.password} required>
+            {(controlProps) => (
+              <PasswordInput
+                {...controlProps}
+                name="password"
+                autoComplete="current-password"
+                placeholder="Senha"
+                value={values.password}
+                onChange={(e) => set('password', e.target.value)}
+              />
+            )}
+          </Field>
+          <span aria-disabled="true" className="cursor-not-allowed self-end text-sm text-muted-foreground">
+            Esqueceu a senha?
+            <span className="sr-only"> (indisponível nesta demonstração)</span>
+          </span>
+        </div>
 
-        <Button type="submit" size="lg" loading={login.isPending} className="w-full">
+        <Button type="submit" size="lg" loading={login.isPending} className="mt-1 w-full">
           Entrar
         </Button>
 
-        <p className="text-sm text-muted-foreground">
-          Ambiente de demonstração: use <strong className="font-semibold text-foreground">ana@jungle.dev</strong> com a senha{' '}
-          <strong className="font-semibold text-foreground">jungle123</strong>.
+        <p className="text-center text-xs text-muted-foreground">
+          Demonstração: <strong className="font-semibold text-foreground">ana@jungle.dev</strong> /{' '}
+          <strong className="font-semibold text-foreground">jungle123</strong>
         </p>
       </form>
-    </AuthLayout>
+    </AuthModal>
   )
 }
