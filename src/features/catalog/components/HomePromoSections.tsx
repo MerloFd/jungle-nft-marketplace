@@ -87,7 +87,7 @@ function ForaDeEscopo({ children, className }: { children: React.ReactNode; clas
 export function HomePromoSections() {
   return (
     <>
-      <section aria-label="Destaques da Kurio" className="grid gap-5 sm:grid-cols-2">
+      <section id="criadores" aria-label="Criadores em destaque" style={{ scrollMarginTop: 96 }} className="grid gap-5 sm:grid-cols-2">
         {PROMOS.map((p) => (
           <div key={p.title} className="flex items-center gap-5 rounded-xl bg-card p-4">
             <img src={p.image} alt={p.alt} width={160} height={138} className="h-[138px] w-40 shrink-0 rounded-lg object-cover" />
@@ -100,7 +100,7 @@ export function HomePromoSections() {
         ))}
       </section>
 
-      <section aria-labelledby="blog-title" className="flex flex-col gap-6">
+      <section id="aprenda" aria-labelledby="blog-title" style={{ scrollMarginTop: 96 }} className="flex flex-col gap-6">
         <div className="flex flex-col items-center gap-1 text-center">
           <h2 id="blog-title" className="text-2xl font-bold md:text-3xl">
             Diário da Cunhagem

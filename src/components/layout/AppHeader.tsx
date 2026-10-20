@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { PageContainer } from './PageContainer'
 
-export type RenderLink = (to: string, children: React.ReactNode, className?: string) => React.ReactNode
+export type RenderLink = (to: string, children: React.ReactNode, className?: string, ariaCurrent?: 'page' | false) => React.ReactNode
 
 export interface AppHeaderUser {
   name: string
@@ -23,6 +23,10 @@ export interface AppHeaderProps {
 }
 
 const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+
+function navItemClass(active: boolean, extra?: string) {
+  return cn(navItem, active && '!border-primary !text-primary', extra)
+}
 
 const navItem = cn(
   'inline-flex min-h-11 items-center border-b-2 border-transparent px-1 text-base font-medium text-foreground transition-colors',
@@ -46,27 +50,16 @@ export function Logo({ renderLink }: { renderLink: RenderLink }) {
     <span onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
       {renderLink(
         '/',
-        <span className="text-xl font-bold uppercase tracking-[0.2em] md:text-2xl">Kurio</span>,
-        cn('inline-flex min-h-11 items-center text-foreground', focusRing),
+        <>
+          <img src="/kurio/emerald-ape-icon.jpg" alt="" width={28} height={28} className="size-7 rounded-full object-cover" />
+          <span className="text-xl font-bold uppercase tracking-[0.2em] md:text-2xl">Kurio</span>
+        </>,
+        cn('inline-flex min-h-11 items-center gap-2 text-foreground', focusRing),
       )}
     </span>
   )
 }
 
-
-/**
- * O cabeçalho do Figma traz quatro itens, mas o enunciado não entrega as telas
- * de Criadores e Aprenda e proíbe que ação fora de escopo aparente funcionar.
- * O item aparece, mantendo a composição, e se declara indisponível.
- */
-function NavItemForaDeEscopo({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <span aria-disabled="true" className={cn(navItem, 'cursor-not-allowed text-muted-foreground hover:text-muted-foreground', className)}>
-      {children}
-      <span className="sr-only"> (não faz parte desta entrega)</span>
-    </span>
-  )
-}
 
 function CartLink({ count, renderLink, className }: { count: number; renderLink: RenderLink; className?: string }) {
   const label = count === 1 ? 'Carrinho, 1 item' : `Carrinho, ${count} itens`
@@ -159,20 +152,36 @@ function HeaderSearchForm({ open }: { open: boolean }) {
 }
 
 
-/** Acompanha se a seção #catalogo está na tela, para destacar "Mercado" ao rolar até ela. */
-function useCatalogSectionVisible() {
-  const [visible, setVisible] = React.useState(false)
+type HomeSection = 'inicio' | 'mercado' | 'criadores' | 'aprenda'
+
+/**
+ * A home tem 4 seções reais (Início, #catalogo = Mercado, #criadores,
+ * #aprenda), na mesma ordem dos itens do cabeçalho. Marca ativa a última
+ * cujo topo já passou da linha do cabeçalho, para o destaque seguir o scroll
+ * em vez de ficar preso no primeiro item.
+ */
+function useActiveHomeSection(): HomeSection {
+  const [active, setActive] = React.useState<HomeSection>('inicio')
   React.useEffect(() => {
-    const el = document.getElementById('catalogo')
-    if (!el) {
-      setVisible(false)
+    const ids: [string, HomeSection][] = [
+      ['catalogo', 'mercado'],
+      ['criadores', 'criadores'],
+      ['aprenda', 'aprenda'],
+    ]
+    const els = ids
+      .map(([id, section]) => [document.getElementById(id), section] as const)
+      .filter((x): x is [HTMLElement, HomeSection] => x[0] !== null)
+    if (els.length === 0) {
+      setActive('inicio')
       return
     }
-    // Ativo a partir do momento em que o catálogo passa do cabeçalho, e
-    // continua ativo nas seções seguintes (destaques, blog) até o rodapé —
-    // um IntersectionObserver só no próprio elemento desligaria assim que
-    // ele saísse da tela, mesmo rolando ainda dentro da mesma área.
-    const check = () => setVisible(el.getBoundingClientRect().top <= 96)
+    const check = () => {
+      let current: HomeSection = 'inicio'
+      for (const [el, section] of els) {
+        if (el.getBoundingClientRect().top <= 96) current = section
+      }
+      setActive(current)
+    }
     check()
     window.addEventListener('scroll', check, { passive: true })
     window.addEventListener('resize', check)
@@ -181,11 +190,11 @@ function useCatalogSectionVisible() {
       window.removeEventListener('resize', check)
     }
   }, [])
-  return visible
+  return active
 }
 
 export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoading }: AppHeaderProps) {
-  const catalogVisible = useCatalogSectionVisible()
+  const activeSection = useActiveHomeSection()
   const [open, setOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
   const close = () => setOpen(false)
@@ -197,12 +206,16 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
           <Logo renderLink={renderLink} />
 
           <nav aria-label="Principal" className="mx-auto hidden items-center gap-10 lg:flex">
-            {renderLink('/', 'Início', catalogVisible ? cn(navItem, '!border-transparent !text-foreground') : navItem)}
-            <a href="/#catalogo" aria-current={catalogVisible ? 'page' : undefined} className={navItem}>
+            {renderLink('/', 'Início', navItemClass(activeSection === 'inicio'), activeSection === 'inicio' ? 'page' : false)}
+            <a href="/#catalogo" aria-current={activeSection === 'mercado' ? 'page' : undefined} className={navItemClass(activeSection === 'mercado')}>
               Mercado
             </a>
-            <NavItemForaDeEscopo>Criadores</NavItemForaDeEscopo>
-            <NavItemForaDeEscopo>Aprenda</NavItemForaDeEscopo>
+            <a href="/#criadores" aria-current={activeSection === 'criadores' ? 'page' : undefined} className={navItemClass(activeSection === 'criadores')}>
+              Criadores
+            </a>
+            <a href="/#aprenda" aria-current={activeSection === 'aprenda' ? 'page' : undefined} className={navItemClass(activeSection === 'aprenda')}>
+              Aprenda
+            </a>
           </nav>
 
           <div className="ml-auto flex items-center gap-1 lg:ml-0">
@@ -271,14 +284,22 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
                         <span className="truncate font-semibold">{user.name}</span>
                       </li>
                     ) : null}
-                    <li>{renderLink('/', 'Início', catalogVisible ? cn(navItem, 'w-full border-b-0 !border-transparent !text-foreground') : cn(navItem, 'w-full border-b-0'))}</li>
+                    <li>{renderLink('/', 'Início', navItemClass(activeSection === 'inicio', 'w-full border-b-0'), activeSection === 'inicio' ? 'page' : false)}</li>
                     <li>
-                      <a href="/#catalogo" aria-current={catalogVisible ? 'page' : undefined} className={cn(navItem, 'w-full border-b-0')}>
+                      <a href="/#catalogo" aria-current={activeSection === 'mercado' ? 'page' : undefined} className={navItemClass(activeSection === 'mercado', 'w-full border-b-0')}>
                         Mercado
                       </a>
                     </li>
-                    <li><NavItemForaDeEscopo className="w-full border-b-0">Criadores</NavItemForaDeEscopo></li>
-                    <li><NavItemForaDeEscopo className="w-full border-b-0">Aprenda</NavItemForaDeEscopo></li>
+                    <li>
+                      <a href="/#criadores" aria-current={activeSection === 'criadores' ? 'page' : undefined} className={navItemClass(activeSection === 'criadores', 'w-full border-b-0')}>
+                        Criadores
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/#aprenda" aria-current={activeSection === 'aprenda' ? 'page' : undefined} className={navItemClass(activeSection === 'aprenda', 'w-full border-b-0')}>
+                        Aprenda
+                      </a>
+                    </li>
                     <li>
                       {renderLink(
                         '/cart',

@@ -32,6 +32,8 @@ interface NftSpec {
   editions: EditionSpec[]
   featured?: boolean
   network?: Network
+  /** Substitui a imagem gerada por um asset real (ex.: recorte do Figma). */
+  imageOverride?: { src: string; alt: string }
 }
 
 const EDITION_KEYS = [
@@ -42,19 +44,20 @@ const EDITION_KEYS = [
 
 const SPECS: NftSpec[] = [
   /* 01 */ {
-    name: 'Aurora Digital',
+    name: 'Emerald Ape #042',
     category: 'art',
     creator: 1,
     collection: 'Céus Elétricos',
-    description: 'Ondas de luz que se dobram sobre um horizonte que nunca amanhece, pintadas linha a linha em código.',
-    visual: 'ondas coloridas em camadas sobre fundo escuro',
-    tags: ['generativo', 'luz', 'ondas'],
+    description: 'Um colecionável de edição gênese: jaqueta universitária verde, pingente de esmeralda e óculos redondos. Parte do primeiro lote cunhado na Kurio.',
+    visual: 'retrato ilustrado de um macaco com jaqueta verde e pingente de esmeralda',
+    tags: ['gênese', 'retrato', 'edição limitada'],
     editions: [
-      ['0.25', 20, 10, 5],
-      ['0.75', 10, 6, 3],
-      ['1.5', 5, 3, 1],
+      ['1.19', 20, 10, 5],
+      ['1.69', 10, 6, 3],
+      ['1.99', 5, 3, 1],
     ],
     featured: true,
+    imageOverride: { src: '/kurio/emerald-ape-hero.jpg', alt: 'Emerald Ape #042: retrato ilustrado de um macaco com jaqueta verde e pingente de esmeralda' },
   },
   /* 02 */ {
     name: 'Faixas do Silêncio',
@@ -601,15 +604,17 @@ function buildNft(spec: NftSpec, index: number): NftDetail {
     available,
     maxPerOrder,
   }))
-  const images = [1, 2, 3].map((v) => ({
-    src: `/nfts/nft-${n}-${v}.svg`,
-    alt: `${spec.name}, variação ${v}: ${spec.visual}`,
-  }))
+  const images = spec.imageOverride
+    ? [spec.imageOverride, ...[2, 3].map((v) => ({ src: `/nfts/nft-${n}-${v}.svg`, alt: `${spec.name}, variação ${v}: ${spec.visual}` }))]
+    : [1, 2, 3].map((v) => ({
+        src: `/nfts/nft-${n}-${v}.svg`,
+        alt: `${spec.name}, variação ${v}: ${spec.visual}`,
+      }))
   return {
     id,
     name: spec.name,
     image: images[0].src,
-    imageAlt: `${spec.name}: ${spec.visual}`,
+    imageAlt: spec.imageOverride ? spec.imageOverride.alt : `${spec.name}: ${spec.visual}`,
     category: spec.category,
     creator,
     collectionName: spec.collection,
