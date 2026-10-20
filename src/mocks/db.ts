@@ -115,7 +115,7 @@ export const SEED_PASSWORD = 'jungle123'
 // Utilidades
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY = 'mock:db:v2'
+const STORAGE_KEY = 'mock:db:v3'
 
 export function nowIso() {
   return new Date(Date.now()).toISOString()

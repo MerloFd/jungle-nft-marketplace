@@ -22,17 +22,17 @@ test.describe('catálogo', () => {
     await expect(page.getByTestId('catalog')).toBeVisible()
     const totalInicial = await cards(page).count()
 
-    await page.getByTestId('catalog-search').fill('Aurora')
+    await page.getByTestId('catalog-search').fill('Astronaut')
     await page.getByTestId('catalog-search').press('Enter')
 
-    await expect(page).toHaveURL(/[?&]q=Aurora/)
+    await expect(page).toHaveURL(/[?&]q=Astronaut/)
     await expect(cards(page).first()).toBeVisible()
     // `keepPreviousData` mantém a grade anterior até a resposta nova chegar.
     await expect.poll(() => cards(page).count(), { timeout: 20_000 }).toBeLessThan(totalInicial)
     await expect(page.getByTestId('catalog-total')).toContainText(/NFTs? encontrados?/)
 
     await page.reload()
-    await expect(page.getByTestId('catalog-search')).toHaveValue('Aurora')
+    await expect(page.getByTestId('catalog-search')).toHaveValue('Astronaut')
   })
 
   test('categoria e disponibilidade combinam na URL e voltam à primeira página', async ({ page, app }) => {

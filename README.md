@@ -337,13 +337,13 @@ escolhidos para conviver com a paleta âmbar e passar nos limites de contraste. 
 reauditado depois dos ajustes finais de composição — a composição não deveria mudar o LCP (mesma
 causa: o boot do MSW), mas os números acima podem estar levemente desatualizados.
 
-**Os 40 NFTs do catálogo usam fotos reais recortadas do Figma, não arte gerada.** São 10 retratos
-distintos (`public/kurio/`, `REAL_IMAGES` em `src/mocks/fixtures.ts`), repetidos pelos 40 itens —
-decisão deliberada: usar fotos reais do arquivo, mesmo repetindo, pesou mais que ter 40 imagens
-únicas geradas. Quatro nomes — "Emerald Ape #042", "Sage Nomad #009", "Neon Vessel #552" e "Golden
-Signal #160" — têm também o preço batendo com o que o Figma mostra; os outros 36 nomes continuam
-fictícios (ex. "Faixas do Silêncio"), só a imagem é real. A arte abstrata gerada antes usada
-(`scripts/generate-art.mjs`) foi removida do projeto.
+**Os 40 NFTs do catálogo são 10 personagens reais do Figma, cada um em 4 edições.** O nome de cada
+NFT é o nome do arquivo de origem, em inglês (ex. "Emerald Ape", "Armored Gorilla", "Suit And
+Chain"), seguido de `#` e o número do item no catálogo — nome, descrição, tags e foto vêm todos do
+mesmo registro de personagem (`CHARACTERS` em `src/mocks/fixtures.ts`), então não tem como um ficar
+incoerente com o outro. Categoria, criador, coleção e preço continuam variando por item (é isso que
+dá variedade ao catálogo; não tem relação com qual personagem aparece). A arte abstrata gerada antes
+usada (`scripts/generate-art.mjs`) foi removida do projeto.
 
 **Sem backend real.** Tudo é simulado no navegador; a "blockchain" é uma função que sorteia um hash.
 
