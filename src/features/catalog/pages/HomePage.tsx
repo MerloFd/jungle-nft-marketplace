@@ -15,6 +15,7 @@ import { ActiveFilterChips } from '../components/ActiveFilterChips'
 import { CatalogFilters } from '../components/CatalogFilters'
 import { CatalogSearchField } from '../components/CatalogSearchField'
 import { HomeHero } from '../components/HomeHero'
+import { HomePromoSections } from '../components/HomePromoSections'
 import { NftCard, NftCardSkeleton } from '../components/NftCard'
 import { useMediaQuery, useNftList } from '../hooks'
 import { CATALOG_PAGE_SIZE, type CatalogSearch } from '../search'
@@ -197,6 +198,8 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      <HomePromoSections />
     </PageContainer>
   )
 }

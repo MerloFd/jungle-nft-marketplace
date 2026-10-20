@@ -168,11 +168,18 @@ function useCatalogSectionVisible() {
       setVisible(false)
       return
     }
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
-      rootMargin: '-96px 0px -70% 0px',
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
+    // Ativo a partir do momento em que o catálogo passa do cabeçalho, e
+    // continua ativo nas seções seguintes (destaques, blog) até o rodapé —
+    // um IntersectionObserver só no próprio elemento desligaria assim que
+    // ele saísse da tela, mesmo rolando ainda dentro da mesma área.
+    const check = () => setVisible(el.getBoundingClientRect().top <= 96)
+    check()
+    window.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check)
+    return () => {
+      window.removeEventListener('scroll', check)
+      window.removeEventListener('resize', check)
+    }
   }, [])
   return visible
 }
