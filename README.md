@@ -46,7 +46,9 @@ Não há API real: com `VITE_ENABLE_MOCKS=false` a aplicação sobe, mas toda ch
 | `bruno@jungle.dev` | `jungle123` |
 
 Os dois usuários existem para demonstrar o isolamento de dados: favoritos, carrinho, carteiras e
-pedidos de um não aparecem para o outro.
+pedidos de um não aparecem para o outro. A seed também cobre dois estados de carteira: a Ana já
+tem as duas (principal e secundária preenchidas), o Bruno tem só a principal — entre com Bruno para
+testar o cadastro de uma carteira nova.
 
 ### Cupons
 

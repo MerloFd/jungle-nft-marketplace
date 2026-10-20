@@ -50,8 +50,6 @@ test.describe('acessibilidade', () => {
     await expect(dialogo).toHaveCount(0)
   })
 
-  // Defeito do app: ao fechar o diálogo o foco vai para o <body>, não volta para
-  // o botão que o abriu (WalletsPage usa `open` controlado, sem DialogTrigger).
   test('diálogo devolve o foco ao botão que o abriu', async ({ page, app }) => {
     await app.boot('/login', 'fast')
     await app.login('ana')

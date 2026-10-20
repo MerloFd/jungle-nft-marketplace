@@ -33,6 +33,7 @@ test.describe('carrinho', () => {
     await app.boot('/nft/nft-01', 'fast')
     await expect(page.getByTestId('nft-detail')).toBeVisible()
     await page.getByTestId('add-to-cart').click()
+    await expect(app.cartBadge()).toHaveText('1', { timeout: 25_000 })
 
     await page.goto('/cart')
     await expect(page.getByTestId('cart')).toBeVisible()

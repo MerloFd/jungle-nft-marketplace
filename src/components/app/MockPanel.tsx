@@ -63,17 +63,18 @@ export function MockPanel() {
           </fieldset>
           <div className="flex flex-col gap-2">
             <p className="font-semibold">Ações do servidor simulado</p>
-            <Button variant="outline" onClick={bumpPrice}>
+            <Button variant="outline" className="h-auto whitespace-normal py-2.5 text-left" onClick={bumpPrice}>
               Subir preço do NFT "Aurora Digital"
             </Button>
-            <Button variant="outline" onClick={() => mock.dropSockets()}>
+            <Button variant="outline" className="h-auto whitespace-normal py-2.5 text-left" onClick={() => mock.dropSockets()}>
               Derrubar conexão em tempo real
             </Button>
-            <Button variant="outline" onClick={() => mock.expireSessions()}>
+            <Button variant="outline" className="h-auto whitespace-normal py-2.5 text-left" onClick={() => mock.expireSessions()}>
               Expirar sessão
             </Button>
             <Button
               variant="destructive"
+              className="h-auto whitespace-normal py-2.5 text-left"
               onClick={async () => {
                 await mock.reset()
                 try {

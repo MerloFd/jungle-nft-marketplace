@@ -31,10 +31,12 @@ export function HomePage() {
    * `replace: false` (push) em controles discretos: o botão voltar restaura o
    * estado anterior. `replace: true` nos campos digitados (busca e preço),
    * que senão criariam uma entrada de histórico por tecla.
+   * resetScroll: false porque o router trata troca de search param como
+   * navegacao e levaria a pagina de volta ao topo a cada clique em filtro.
    */
   const patchWith = React.useCallback(
     (patch: Partial<CatalogSearch>, replace: boolean) => {
-      void navigate({ search: (prev) => ({ ...prev, ...patch, page: undefined }), replace })
+      void navigate({ search: (prev) => ({ ...prev, ...patch, page: undefined }), replace, resetScroll: false })
     },
     [navigate],
   )
@@ -42,7 +44,7 @@ export function HomePage() {
   const patch = React.useCallback((p: Partial<CatalogSearch>) => patchWith(p, false), [patchWith])
   const patchQuiet = React.useCallback((p: Partial<CatalogSearch>) => patchWith(p, true), [patchWith])
   const clearFilters = React.useCallback(() => {
-    void navigate({ search: {}, replace: false })
+    void navigate({ search: {}, replace: false, resetScroll: false })
   }, [navigate])
 
   const hasActiveFilters = Boolean(
@@ -77,37 +79,37 @@ export function HomePage() {
           Catálogo
         </h2>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-stretch">
           <CatalogSearchField value={search.q ?? ''} onCommit={(q) => patchQuiet({ q })} />
 
-          <div className="flex items-start gap-3">
-            <Field label="Ordenar por" id="catalog-sort" className="min-w-[200px]">
-              {(controlProps) => (
-                <Select
-                  value={search.sort ?? 'recent'}
-                  onValueChange={(v) => {
-                    const parsed = NftSort.parse(v)
-                    patch({ sort: parsed === 'recent' ? undefined : parsed })
-                  }}
-                >
-                  <SelectTrigger {...controlProps} data-testid="catalog-sort">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {NftSort.options.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {NFT_SORT_LABEL[option]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </Field>
+          <Field label="Ordenar por" hideLabel id="catalog-sort" className="min-w-0 flex-1">
+            {(controlProps) => (
+              <Select
+                value={search.sort ?? 'recent'}
+                onValueChange={(v) => {
+                  const parsed = NftSort.parse(v)
+                  patch({ sort: parsed === 'recent' ? undefined : parsed })
+                }}
+              >
+                <SelectTrigger {...controlProps} data-testid="catalog-sort">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {NftSort.options.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {NFT_SORT_LABEL[option]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </Field>
 
+          <div className="flex min-w-0 items-start gap-3">
             {!isDesktop ? (
               <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="mt-7">
+                  <Button variant="outline">
                     <SlidersHorizontal aria-hidden="true" />
                     Filtros
                   </Button>
@@ -124,7 +126,9 @@ export function HomePage() {
           </div>
         </div>
 
-        <ActiveFilterChips value={search} onPatch={patch} />
+        <div className="min-h-8">
+          <ActiveFilterChips value={search} onPatch={patch} />
+        </div>
 
         <div className="flex flex-col gap-8 lg:flex-row">
           {isDesktop ? (

@@ -99,17 +99,19 @@ export function useRegister() {
 export function useLogout() {
   const qc = useQueryClient()
   return useMutation({
+    // A sessão local é encerrada primeiro: se a requisição for interrompida
+    // por uma navegação, o usuário não pode continuar autenticado.
+    onMutate: () => {
+      setToken(null)
+      qc.clear()
+      qc.setQueryData(qk.session, null)
+    },
     mutationFn: async () => {
       try {
         await sessionApi.logout()
       } catch {
-        /* mesmo offline, a sessão local é encerrada */
+        /* mesmo offline, a sessão já foi encerrada no cliente */
       }
-    },
-    onSettled: () => {
-      setToken(null)
-      qc.clear()
-      qc.setQueryData(qk.session, null)
     },
   })
 }

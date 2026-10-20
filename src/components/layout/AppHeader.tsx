@@ -49,6 +49,21 @@ export function Logo({ renderLink }: { renderLink: RenderLink }) {
   )
 }
 
+
+/**
+ * O cabeçalho do Figma traz quatro itens, mas o enunciado não entrega as telas
+ * de Criadores e Aprenda e proíbe que ação fora de escopo aparente funcionar.
+ * O item aparece, mantendo a composição, e se declara indisponível.
+ */
+function NavItemForaDeEscopo({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span aria-disabled="true" className={cn(navItem, 'cursor-not-allowed text-muted-foreground hover:text-muted-foreground', className)}>
+      {children}
+      <span className="sr-only"> (não faz parte desta entrega)</span>
+    </span>
+  )
+}
+
 function CartLink({ count, renderLink, className }: { count: number; renderLink: RenderLink; className?: string }) {
   const label = count === 1 ? 'Carrinho, 1 item' : `Carrinho, ${count} itens`
   return renderLink(
@@ -139,7 +154,27 @@ function HeaderSearchForm({ open }: { open: boolean }) {
   )
 }
 
+
+/** Acompanha se a seção #catalogo está na tela, para destacar "Mercado" ao rolar até ela. */
+function useCatalogSectionVisible() {
+  const [visible, setVisible] = React.useState(false)
+  React.useEffect(() => {
+    const el = document.getElementById('catalogo')
+    if (!el) {
+      setVisible(false)
+      return
+    }
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
+      rootMargin: '-96px 0px -70% 0px',
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  return visible
+}
+
 export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoading }: AppHeaderProps) {
+  const catalogVisible = useCatalogSectionVisible()
   const [open, setOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
   const close = () => setOpen(false)
@@ -152,9 +187,11 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
 
           <nav aria-label="Principal" className="mx-auto hidden items-center gap-10 lg:flex">
             {renderLink('/', 'Início', navItem)}
-            <a href="/#catalogo" className={navItem}>
+            <a href="/#catalogo" aria-current={catalogVisible ? 'page' : undefined} className={navItem}>
               Mercado
             </a>
+            <NavItemForaDeEscopo>Criadores</NavItemForaDeEscopo>
+            <NavItemForaDeEscopo>Aprenda</NavItemForaDeEscopo>
           </nav>
 
           <div className="ml-auto flex items-center gap-1 lg:ml-0">
@@ -225,10 +262,12 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
                     ) : null}
                     <li>{renderLink('/', 'Início', cn(navItem, 'w-full border-b-0'))}</li>
                     <li>
-                      <a href="/#catalogo" className={cn(navItem, 'w-full border-b-0')}>
+                      <a href="/#catalogo" aria-current={catalogVisible ? 'page' : undefined} className={cn(navItem, 'w-full border-b-0')}>
                         Mercado
                       </a>
                     </li>
+                    <li><NavItemForaDeEscopo className="w-full border-b-0">Criadores</NavItemForaDeEscopo></li>
+                    <li><NavItemForaDeEscopo className="w-full border-b-0">Aprenda</NavItemForaDeEscopo></li>
                     <li>
                       {renderLink(
                         '/cart',

@@ -111,6 +111,14 @@
   html {
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
+    /* scrollbar-gutter:stable não é suficiente no Chrome quando o Radix
+       trava o overflow do body (bug conhecido do motor): o espaço reservado
+       some no mesmo instante em que o scrollbar deveria aparecer. A correção
+       robusta é não deixar o scrollbar sumir nunca: html é o elemento de
+       rolagem real (sem isso, sem overflow-y, o body assumiria esse papel e
+       o Radix trava o lugar errado) e overflow-y:scroll mantém a barra
+       sempre presente, mesmo em páginas curtas. */
+    overflow-y: scroll;
   }
   body {
     background-color: var(--background);
@@ -118,7 +126,6 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
-    overflow-x: hidden;
   }
   img,
   svg,
@@ -148,6 +155,12 @@
     background-size: 200% 100%;
     background-repeat: no-repeat;
     animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .sr-only-focusable:not(:focus):not(:focus-within) {

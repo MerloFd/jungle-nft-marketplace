@@ -140,7 +140,7 @@ export function CartPage() {
                   asChild={!hasSoldOut}
                   disabled={hasSoldOut}
                   aria-disabled={hasSoldOut || undefined}
-                  className="w-full"
+                  className="h-auto w-full whitespace-normal py-3 text-center"
                 >
                   {hasSoldOut ? (
                     <>

@@ -12,7 +12,11 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI ? 1 : 1,
+  // Escrita concorrente de trace/vídeo em paralelo total causa ENOENT
+  // esporádico no Windows (I/O, não produto); um teto moderado mantém a
+  // suíte confiável sem perder o paralelismo entre arquivos.
+  workers: process.env.CI ? undefined : 4,
   reporter: [['html', { open: 'never' }], ['list']],
   timeout: 45_000,
   expect: { timeout: 8_000, toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: 'disabled' } },

@@ -44,7 +44,7 @@ export function CatalogSearchField({ value, onCommit }: CatalogSearchFieldProps)
   }
 
   return (
-    <Field label="Buscar NFTs" hideLabel className="w-full">
+    <Field label="Buscar NFTs" hideLabel className="min-w-0 w-full flex-1">
       {(controlProps) => (
         <div className="relative flex w-full items-center">
           <Search aria-hidden="true" className="pointer-events-none absolute left-4 size-5 text-muted-foreground" />
