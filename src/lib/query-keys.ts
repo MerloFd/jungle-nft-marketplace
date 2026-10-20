@@ -12,6 +12,7 @@ export const qk = {
     list: (params: NftListParams) => ['nfts', 'list', params] as const,
     featured: ['nfts', 'featured'] as const,
     detail: (id: string) => ['nfts', 'detail', id] as const,
+    facets: ['nfts', 'facets'] as const,
   },
   /** scope = userId ou "guest" */
   cart: (scope: string) => ['cart', scope] as const,

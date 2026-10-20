@@ -1,11 +1,15 @@
 import * as React from 'react'
 import { Availability, Category, CATEGORY_LABEL, type Category as CategoryType } from '@/contracts'
+import { formatEth } from '@/lib/money'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Slider } from '@/components/ui/slider'
+import { useCatalogFacets } from '../hooks'
 import type { CatalogSearch } from '../search'
 
 const AVAILABILITY_LABEL: Record<Availability, string> = {
@@ -28,27 +32,18 @@ export interface CatalogFiltersProps {
 }
 
 /**
- * Barra lateral do Figma (310px, gap 24px): Coleções, Faixa de preço e
- * Disponibilidade. A seção "Rede" do desenho não existe aqui porque
- * `GET /api/nfts` não aceita filtro por rede; as contagens por coleção também
- * não vêm da API e por isso não aparecem (número inventado é dado fictício).
+ * Barra lateral do Figma (310px, gap 24px): Coleções com contagem, Faixa de
+ * preço com slider e Disponibilidade. As contagens e os limites do slider vêm
+ * de `GET /nfts/facets`, agregado no mock a partir do catálogo real — nunca
+ * número inventado em componente.
  */
 export function CatalogFilters({ value, onPatch, onPatchQuiet, onClear, hasActiveFilters }: CatalogFiltersProps) {
   const selected = value.category ?? []
+  const facets = useCatalogFacets()
 
   const toggleCategory = (category: CategoryType, checked: boolean) => {
     const next = checked ? [...selected, category] : selected.filter((c) => c !== category)
     onPatch({ category: next.length ? next : undefined })
-  }
-
-  const min = usePriceDraft(value.minPrice, (minPrice) => onPatchQuiet({ minPrice }))
-  const max = usePriceDraft(value.maxPrice, (maxPrice) => onPatchQuiet({ maxPrice }))
-
-  const applyPrice = () => {
-    if (min.invalid || max.invalid) return
-    min.markSent()
-    max.markSent()
-    onPatchQuiet({ minPrice: min.value, maxPrice: max.value })
   }
 
   return (
@@ -57,40 +52,33 @@ export function CatalogFilters({ value, onPatch, onPatchQuiet, onClear, hasActiv
         <legend className="mb-3 text-lg font-bold uppercase tracking-[0.1em]">Coleções</legend>
         {Category.options.map((category) => {
           const id = `filter-category-${category}`
+          const count = facets.data?.category[category]
           return (
-            <div key={category} className="flex min-h-9 items-center gap-3">
-              <Checkbox
-                id={id}
-                data-testid={id}
-                checked={selected.includes(category)}
-                onCheckedChange={(checked) => toggleCategory(category, checked === true)}
-              />
-              <Label htmlFor={id} className="text-sm font-normal">
-                {CATEGORY_LABEL[category]}
-              </Label>
+            <div key={category} className="flex min-h-9 items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id={id}
+                  data-testid={id}
+                  checked={selected.includes(category)}
+                  onCheckedChange={(checked) => toggleCategory(category, checked === true)}
+                />
+                <Label htmlFor={id} className="text-sm font-normal">
+                  {CATEGORY_LABEL[category]}
+                </Label>
+              </div>
+              {facets.isPending ? (
+                <Skeleton className="h-4 w-6" />
+              ) : count !== undefined ? (
+                <span aria-hidden="true" className="text-sm text-muted-foreground">
+                  ({count})
+                </span>
+              ) : null}
             </div>
           )
         })}
       </fieldset>
 
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-3 text-lg font-bold uppercase tracking-[0.1em]">Faixa de preço</legend>
-        <div className="grid grid-cols-2 gap-3">
-          <PriceField testId="filter-min-price" label="Mínimo" draft={min} />
-          <PriceField testId="filter-max-price" label="Máximo" draft={max} />
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Preço: {min.draft || '0'} – {max.draft || 'sem limite'} ETH
-        </p>
-        <Button
-          variant="outline"
-          className="w-fit rounded-sm"
-          disabled={min.invalid || max.invalid}
-          onClick={applyPrice}
-        >
-          Aplicar
-        </Button>
-      </fieldset>
+      <PriceRangeFilter value={value} onPatchQuiet={onPatchQuiet} facetMin={facets.data?.priceRange.min} facetMax={facets.data?.priceRange.max} />
 
       <Field label="Disponibilidade" id="filter-availability">
         {(controlProps) => (
@@ -121,6 +109,74 @@ export function CatalogFilters({ value, onPatch, onPatchQuiet, onClear, hasActiv
         </Button>
       ) : null}
     </div>
+  )
+}
+
+interface PriceRangeFilterProps {
+  value: CatalogSearch
+  onPatchQuiet: (patch: Partial<CatalogSearch>) => void
+  /** Limites reais do catálogo inteiro, vindos de /nfts/facets. */
+  facetMin?: string
+  facetMax?: string
+}
+
+/**
+ * Slider de dois cursores (Radix, operável por teclado) acoplado aos dois
+ * campos numéricos — os campos continuam existindo porque digitar um valor
+ * exato é mais confiável que arrastar, e os dois controles ficam sincronizados.
+ */
+function PriceRangeFilter({ value, onPatchQuiet, facetMin, facetMax }: PriceRangeFilterProps) {
+  const min = usePriceDraft(value.minPrice, (minPrice) => onPatchQuiet({ minPrice }))
+  const max = usePriceDraft(value.maxPrice, (maxPrice) => onPatchQuiet({ maxPrice }))
+
+  const bounds = facetMin !== undefined && facetMax !== undefined ? { lo: Number(facetMin), hi: Math.max(Number(facetMax), Number(facetMin) + 0.01) } : null
+
+  const sliderValue: [number, number] | null = bounds
+    ? [min.invalid || !min.value ? bounds.lo : Math.max(bounds.lo, Number(min.value)), max.invalid || !max.value ? bounds.hi : Math.min(bounds.hi, Number(max.value))]
+    : null
+
+  const applyPrice = () => {
+    if (min.invalid || max.invalid) return
+    min.markSent()
+    max.markSent()
+    onPatchQuiet({ minPrice: min.value, maxPrice: max.value })
+  }
+
+  return (
+    <fieldset className="flex flex-col gap-3">
+      <legend className="mb-1 text-lg font-bold uppercase tracking-[0.1em]">Faixa de preço</legend>
+
+      {bounds && sliderValue ? (
+        <Slider
+          aria-label="Faixa de preço em ETH"
+          data-testid="filter-price-slider"
+          min={bounds.lo}
+          max={bounds.hi}
+          step={0.01}
+          value={sliderValue}
+          onValueChange={([lo, hi]) => {
+            min.setDraft(lo.toFixed(2))
+            max.setDraft(hi.toFixed(2))
+          }}
+          onValueCommit={() => applyPrice()}
+          className="mt-1"
+        />
+      ) : (
+        <Skeleton className="h-6 w-full" />
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <PriceField testId="filter-min-price" label="Mínimo" draft={min} />
+        <PriceField testId="filter-max-price" label="Máximo" draft={max} />
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Preço: {min.draft || (bounds ? formatEth(String(bounds.lo), { withUnit: false }) : '0')} –{' '}
+        {max.draft || (bounds ? formatEth(String(bounds.hi), { withUnit: false }) : 'sem limite')} ETH
+      </p>
+      <Button variant="outline" className="w-fit rounded-sm" disabled={min.invalid || max.invalid} onClick={applyPrice}>
+        Aplicar
+      </Button>
+    </fieldset>
   )
 }
 

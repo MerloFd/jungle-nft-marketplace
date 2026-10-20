@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { PageContainer } from './PageContainer'
 
-export type RenderLink = (to: string, children: React.ReactNode, className?: string) => React.ReactNode
+export type RenderLink = (to: string, children: React.ReactNode, className?: string, forceInactive?: boolean) => React.ReactNode
 
 export interface AppHeaderUser {
   name: string
@@ -206,7 +206,7 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
           <Logo renderLink={renderLink} />
 
           <nav aria-label="Principal" className="mx-auto hidden items-center gap-10 lg:flex">
-            {renderLink('/', 'Início', navItemClass(activeSection === 'inicio'))}
+            {renderLink('/', 'Início', navItemClass(activeSection === 'inicio'), activeSection !== 'inicio')}
             <a href="/#catalogo" aria-current={activeSection === 'mercado' ? 'page' : undefined} className={navItemClass(activeSection === 'mercado')}>
               Mercado
             </a>
@@ -284,7 +284,7 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
                         <span className="truncate font-semibold">{user.name}</span>
                       </li>
                     ) : null}
-                    <li>{renderLink('/', 'Início', navItemClass(activeSection === 'inicio', 'w-full border-b-0'))}</li>
+                    <li>{renderLink('/', 'Início', navItemClass(activeSection === 'inicio', 'w-full border-b-0'), activeSection !== 'inicio')}</li>
                     <li>
                       <a href="/#catalogo" aria-current={activeSection === 'mercado' ? 'page' : undefined} className={navItemClass(activeSection === 'mercado', 'w-full border-b-0')}>
                         Mercado

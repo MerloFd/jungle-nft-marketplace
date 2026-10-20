@@ -67,6 +67,7 @@ erro, e não um dado torto dentro do cache.
 | `GET /nfts?q&category&minPrice&maxPrice&availability&sort&page&pageSize` | paginado; os mesmos nomes valem na URL da aplicação |
 | `GET /nfts/featured` | destaques da home |
 | `GET /nfts/:id` | `NftDetail`; 404 `NOT_FOUND` |
+| `GET /nfts/facets` | contagem por categoria e faixa de preço, agregadas do catálogo inteiro (não filtrado); alimenta a barra de filtros sem número inventado em componente |
 | `GET /favorites` · `PUT/DELETE /favorites/:nftId` | exige sessão |
 
 ### Carrinho

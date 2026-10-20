@@ -88,7 +88,7 @@ Resumo. A tabela completa, com entradas, saídas e códigos de erro, está em
 | Grupo | Rotas |
 | --- | --- |
 | Sessão | `POST /auth/register` · `POST /auth/login` · `GET /auth/session` · `POST /auth/logout` |
-| Catálogo | `GET /nfts` (busca, filtros, ordenação, paginação) · `GET /nfts/featured` · `GET /nfts/:id` |
+| Catálogo | `GET /nfts` (busca, filtros, ordenação, paginação) · `GET /nfts/featured` · `GET /nfts/:id` · `GET /nfts/facets` |
 | Favoritos | `GET /favorites` · `PUT/DELETE /favorites/:nftId` |
 | Carrinho | `GET/PATCH /cart` · `POST /cart/items` · `PATCH/DELETE /cart/items/:id` · `POST /cart/acknowledge` · `POST/DELETE /cart/coupon` · `POST /cart/merge` |
 | Cotação | `POST /quotes` · `POST /quotes/:id/validate` · `GET /quotes/:id` |
@@ -302,25 +302,27 @@ as medições carregam as mesmas imagens, fontes e funcionalidades da entrega.
 
 ## O que ficou de fora, e por quê
 
-**Composição fiel na maior parte da home; a barra lateral de filtros não reproduz o arranjo do
-Figma.** Tokens (paleta, escala tipográfica, raios, grade) lidos do arquivo e aplicados. Do arranjo:
-fiéis o cabeçalho (marca KURIO com o retrato do NFT em destaque como ícone, navegação com os 4 itens
-do Figma — Início, Mercado, Criadores, Aprenda —, item ativo sublinhado acompanhando a seção visível
-por scroll, busca, carrinho com contador, botão Entrar com rótulo escuro), o divisor do cabeçalho, o
-hero (sobretítulo com tracking, H1 em caixa alta de 43/70, parágrafo, botão EXPLORAR, bolinhas de
-carrossel que trocam o destaque de verdade, imagem real do NFT em destaque à direita), o card de NFT
-reduzido a imagem/nome/preço, e as duas seções entre a paginação e o rodapé (destaques em cartão
-duplo e o "Diário da Cunhagem" em 4 cards, com as imagens reais recortadas do Figma) — são os
-destinos de "Criadores" e "Aprenda": como a seção 3 do enunciado exclui páginas editoriais da
-entrega, os cartões compõem a tela mas as ações internas ("Explorar", "Ler mais") ficam
-`aria-disabled`, sem fingir levar a algum lugar. O rodapé também foi reconstruído fiel ao arquivo
-(faixa de 3 colunas + newsletter, barra de contato, 4 colunas de links), com cada link real quando
-existe tela por trás (perfil, carteiras, filtro por categoria) e `aria-disabled` quando não existe.
+**Composição fiel na home, incluindo a barra lateral de filtros.** Tokens (paleta, escala
+tipográfica, raios, grade) lidos do arquivo e aplicados. Do arranjo, fiéis: o cabeçalho (marca KURIO
+com o retrato do NFT em destaque como ícone, navegação com os 4 itens do Figma — Início, Mercado,
+Criadores, Aprenda —, item ativo sublinhado acompanhando a seção visível por scroll, um só item
+marcado por vez, busca, carrinho com contador, botão Entrar com rótulo escuro), o divisor do
+cabeçalho, o hero (sobretítulo com tracking, H1 em caixa alta de 43/70, parágrafo, botão EXPLORAR,
+bolinhas de carrossel que trocam o destaque de verdade, foto real do NFT em destaque à direita), o
+card de NFT reduzido a imagem/nome/preço, a barra lateral (Coleções com contagem real por categoria,
+faixa de preço com slider de dois cursores operável por teclado, Disponibilidade), a paginação
+numerada, e as duas seções entre a paginação e o rodapé (destaques em cartão duplo e o "Diário da
+Cunhagem" em 4 cards) — são os destinos de "Criadores" e "Aprenda": como a seção 3 do enunciado
+exclui páginas editoriais da entrega, os cartões compõem a tela mas as ações internas ("Explorar",
+"Ler mais") ficam `aria-disabled`, sem fingir levar a algum lugar. O rodapé também foi reconstruído
+fiel ao arquivo (faixa de 3 colunas + newsletter, barra de contato, 4 colunas de links), com cada
+link real quando existe tela por trás (perfil, carteiras, filtro por categoria) e `aria-disabled`
+quando não existe.
 
-Ficaram de fora **só** a barra lateral de filtros no formato do arquivo (Coleções e Rede com
-contagem, faixa de preço com slider) e o estilo numerado da paginação — o catálogo usa os mesmos
-filtros, só num arranjo diferente (sheet no mobile, coluna no desktop, sem as contagens por
-categoria, que o contrato da API não expõe).
+As contagens por categoria e os limites do slider não são número inventado: vêm de
+`GET /nfts/facets` (`src/mocks/handlers/catalog.ts`), agregado a partir do catálogo real — a mesma
+fonte que `GET /nfts` usa. A seção "Rede" do Figma não existe, porque o contrato não tem filtro por
+rede.
 
 **A família tipográfica não foi confirmada.** O arquivo do Figma amarra a fonte a uma variável
 `font/family` que o modo de visualização não resolve. A interface é monoespaçada no desenho, e o
@@ -335,13 +337,13 @@ escolhidos para conviver com a paleta âmbar e passar nos limites de contraste. 
 reauditado depois dos ajustes finais de composição — a composição não deveria mudar o LCP (mesma
 causa: o boot do MSW), mas os números acima podem estar levemente desatualizados.
 
-**36 dos 40 NFTs do catálogo usam arte abstrata gerada**, não a arte do Figma. Quatro itens —
-"Emerald Ape #042", "Sage Nomad #009", "Neon Vessel #552" e "Golden Signal #160", todos em destaque —
-usam as imagens reais recortadas do arquivo, com nome e preço batendo com o que o Figma mostra. Os
-outros 36 eram originalmente um conjunto fictício com nomes próprios (ex. "Faixas do Silêncio") e não
-foram remapeados um a um para o catálogo do Figma — isso exigiria ver as 4 páginas do grid do arquivo,
-e só a primeira foi lida nesta sessão. Ver `docs/STACK.md` para a lista completa do que é real e do
-que é gerado.
+**Os 40 NFTs do catálogo usam fotos reais recortadas do Figma, não arte gerada.** São 10 retratos
+distintos (`public/kurio/`, `REAL_IMAGES` em `src/mocks/fixtures.ts`), repetidos pelos 40 itens —
+decisão deliberada: usar fotos reais do arquivo, mesmo repetindo, pesou mais que ter 40 imagens
+únicas geradas. Quatro nomes — "Emerald Ape #042", "Sage Nomad #009", "Neon Vessel #552" e "Golden
+Signal #160" — têm também o preço batendo com o que o Figma mostra; os outros 36 nomes continuam
+fictícios (ex. "Faixas do Silêncio"), só a imagem é real. A arte abstrata gerada antes usada
+(`scripts/generate-art.mjs`) foi removida do projeto.
 
 **Sem backend real.** Tudo é simulado no navegador; a "blockchain" é uma função que sorteia um hash.
 

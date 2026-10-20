@@ -81,6 +81,19 @@ export const catalogHandlers = [
     })
   }),
 
+  /** Contagens reais do catálogo (barra de filtros): nunca filtra, sempre agrega tudo. */
+  http.get(`${API}/nfts/facets`, async () => {
+    const fail = (await network()) ?? catalogFailure()
+    if (fail) return fail
+    const all = db().nfts
+    const category = Object.fromEntries(Category.options.map((c) => [c, 0])) as Record<Category, number>
+    for (const n of all) category[n.category] += 1
+    const prices = all.map((n) => n.floorPriceEth)
+    const min = prices.reduce((a, b) => (eth.cmp(a, b) <= 0 ? a : b), prices[0] ?? '0')
+    const max = prices.reduce((a, b) => (eth.cmp(a, b) >= 0 ? a : b), prices[0] ?? '0')
+    return json({ category, priceRange: { min, max } })
+  }),
+
   http.get(`${API}/nfts/:id`, async ({ params }) => {
     const fail = (await network()) ?? catalogFailure()
     if (fail) return fail

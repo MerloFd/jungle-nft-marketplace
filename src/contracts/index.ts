@@ -173,6 +173,18 @@ export type NftListResponse = z.infer<typeof NftListResponse>
 export const FeaturedResponse = z.object({ items: z.array(NftSummary) })
 export type FeaturedResponse = z.infer<typeof FeaturedResponse>
 
+/**
+ * Contagens reais do catálogo inteiro (não filtrado), para a barra de
+ * filtros mostrar quantidade por categoria e os limites de preço do slider
+ * sem inventar número: tudo vem agregado do mesmo catálogo que `GET /nfts`
+ * devolve.
+ */
+export const NftFacets = z.object({
+  category: z.record(Category, z.number().int().nonnegative()),
+  priceRange: z.object({ min: EthAmount, max: EthAmount }),
+})
+export type NftFacets = z.infer<typeof NftFacets>
+
 // ---------------------------------------------------------------------------
 // Sessão e conta
 // ---------------------------------------------------------------------------

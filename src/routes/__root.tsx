@@ -74,11 +74,30 @@ function RootLayout() {
                 },
               })
             }
-            renderLink={(to, children, className) => (
-              <Link to={to} className={className} activeProps={{ 'aria-current': 'page' }}>
-                {children}
-              </Link>
-            )}
+            renderLink={(to, children, className, forceInactive) =>
+              // O Link do TanStack marca aria-current="page" de forma incondicional
+              // sempre que a rota bate (ver applyLinkState em @tanstack/react-router),
+              // sem opção de desligar via props. Quando a tela precisa que este item
+              // NÃO pareça atual (ex.: "Início" enquanto o scroll-spy mostra outra
+              // seção ativa), troca para uma âncora simples com navegação manual, que
+              // não passa pela lógica de link ativo da rota.
+              forceInactive ? (
+                <a
+                  href={to}
+                  className={className}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    void router.navigate({ href: to })
+                  }}
+                >
+                  {children}
+                </a>
+              ) : (
+                <Link to={to} className={className} activeProps={{ 'aria-current': 'page' }}>
+                  {children}
+                </Link>
+              )
+            }
           />
           <ConnectionBanner />
           <main id="main" tabIndex={-1} className="flex-1 outline-none">

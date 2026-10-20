@@ -21,6 +21,15 @@ export function useFeaturedNfts() {
   })
 }
 
+/** Contagens reais do catálogo inteiro, para a barra de filtros (nunca muda com os filtros ativos). */
+export function useCatalogFacets() {
+  return useQuery({
+    queryKey: qk.nfts.facets,
+    queryFn: ({ signal }) => catalogApi.facets(signal),
+    staleTime: 5 * 60_000,
+  })
+}
+
 export function useNftList(search: CatalogSearch) {
   const params = toListParams(search)
   return useQuery({

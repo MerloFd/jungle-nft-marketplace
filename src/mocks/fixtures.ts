@@ -1,7 +1,8 @@
 /**
  * Fixtures determinísticas do catálogo simulado.
  * Todos os nomes, criadores e descrições são fictícios.
- * Arte gerada por scripts/generate-art.mjs em public/nfts e public/avatars.
+ * As fotos dos NFTs (public/kurio/) são recortes reais do Figma, cicladas
+ * pelos 40 itens (REAL_IMAGES abaixo). Avatares de criador continuam gerados.
  */
 import type { Category, Creator, Edition, Network, NftDetail } from '@/contracts'
 
@@ -16,6 +17,25 @@ export const SEED_CREATORS: Creator[] = [
   { id: 'creator-08', name: 'Bia Cobalto', avatarUrl: '/avatars/creator-08.svg' },
   { id: 'creator-09', name: 'Joca Pixelado', avatarUrl: '/avatars/creator-09.svg' },
   { id: 'creator-10', name: 'Mel Arpejo', avatarUrl: '/avatars/creator-10.svg' },
+]
+
+/**
+ * 10 retratos reais recortados do Figma (public/kurio/). Os 40 itens do
+ * catálogo ciclam por eles — não há arte única por NFT, por decisão: a
+ * fidelidade de usar fotos reais do arquivo venceu a de ter 40 imagens
+ * distintas (que exigiria gerar arte nova, fora do que o Figma mostra).
+ */
+const REAL_IMAGES: { src: string; alt: string }[] = [
+  { src: '/kurio/emerald-ape-hero.jpg', alt: 'Retrato ilustrado de um macaco com óculos escuros e jaqueta verde' },
+  { src: '/kurio/sage-nomad-hero.jpg', alt: 'Retrato ilustrado de um macaco com chapéu de pescador e moletom lilás' },
+  { src: '/kurio/neon-vessel-hero.jpg', alt: 'Retrato ilustrado de um macaco com blazer bege e suéter verde' },
+  { src: '/kurio/golden-signal-hero.jpg', alt: 'Retrato ilustrado de um macaco dourado com fone de ouvido verde' },
+  { src: '/kurio/armored-gorilla-hero.jpg', alt: 'Retrato ilustrado de um gorila com protetores auriculares futuristas' },
+  { src: '/kurio/astronaut-hero.jpg', alt: 'Retrato ilustrado de um gorila com traje de astronauta' },
+  { src: '/kurio/aviator-goggles-hero.jpg', alt: 'Retrato ilustrado de um macaco com óculos de aviador e suéter' },
+  { src: '/kurio/bandana-hero.jpg', alt: 'Retrato ilustrado de um macaco com bandana e jaqueta de couro' },
+  { src: '/kurio/red-beanie-hero.jpg', alt: 'Retrato ilustrado de um macaco com gorro vermelho e camisa xadrez' },
+  { src: '/kurio/suit-and-chain-hero.jpg', alt: 'Retrato ilustrado de um gorila de terno com corrente dourada' },
 ]
 
 /** [preço, supply, disponível, máximo por pedido] */
@@ -607,17 +627,15 @@ function buildNft(spec: NftSpec, index: number): NftDetail {
     available,
     maxPerOrder,
   }))
-  const images = spec.imageOverride
-    ? [spec.imageOverride, ...[2, 3].map((v) => ({ src: `/nfts/nft-${n}-${v}.svg`, alt: `${spec.name}, variação ${v}: ${spec.visual}` }))]
-    : [1, 2, 3].map((v) => ({
-        src: `/nfts/nft-${n}-${v}.svg`,
-        alt: `${spec.name}, variação ${v}: ${spec.visual}`,
-      }))
+  const hero = spec.imageOverride ?? REAL_IMAGES[index % REAL_IMAGES.length]
+  // As 10 fotos reais se repetem pelos 40 itens; a galeria do detalhe mostra
+  // a mesma foto nas 3 posições (não são variações de cor como a arte gerada).
+  const images = [hero, hero, hero]
   return {
     id,
     name: spec.name,
     image: images[0].src,
-    imageAlt: spec.imageOverride ? spec.imageOverride.alt : `${spec.name}: ${spec.visual}`,
+    imageAlt: hero.alt,
     category: spec.category,
     creator,
     collectionName: spec.collection,
