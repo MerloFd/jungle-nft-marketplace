@@ -42,10 +42,14 @@ const primaryAction = cn(
 )
 
 export function Logo({ renderLink }: { renderLink: RenderLink }) {
-  return renderLink(
-    '/',
-    <span className="text-xl font-bold uppercase tracking-[0.2em] md:text-2xl">Kurio</span>,
-    cn('inline-flex min-h-11 items-center text-foreground', focusRing),
+  return (
+    <span onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+      {renderLink(
+        '/',
+        <span className="text-xl font-bold uppercase tracking-[0.2em] md:text-2xl">Kurio</span>,
+        cn('inline-flex min-h-11 items-center text-foreground', focusRing),
+      )}
+    </span>
   )
 }
 
@@ -186,7 +190,7 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
           <Logo renderLink={renderLink} />
 
           <nav aria-label="Principal" className="mx-auto hidden items-center gap-10 lg:flex">
-            {renderLink('/', 'Início', navItem)}
+            {renderLink('/', 'Início', catalogVisible ? cn(navItem, '!border-transparent !text-foreground') : navItem)}
             <a href="/#catalogo" aria-current={catalogVisible ? 'page' : undefined} className={navItem}>
               Mercado
             </a>
@@ -260,7 +264,7 @@ export function AppHeader({ cartCount, user, onLogout, renderLink, sessionLoadin
                         <span className="truncate font-semibold">{user.name}</span>
                       </li>
                     ) : null}
-                    <li>{renderLink('/', 'Início', cn(navItem, 'w-full border-b-0'))}</li>
+                    <li>{renderLink('/', 'Início', catalogVisible ? cn(navItem, 'w-full border-b-0 !border-transparent !text-foreground') : cn(navItem, 'w-full border-b-0'))}</li>
                     <li>
                       <a href="/#catalogo" aria-current={catalogVisible ? 'page' : undefined} className={cn(navItem, 'w-full border-b-0')}>
                         Mercado

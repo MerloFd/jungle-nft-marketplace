@@ -36,9 +36,9 @@ export function MockPanel() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="secondary" size="sm" className="fixed bottom-4 left-4 z-40 shadow-lg" data-testid="mock-panel-trigger">
+        <Button variant="secondary" size="icon" aria-label="Cenários de teste" className="fixed bottom-4 left-4 z-40 size-10 shadow-lg sm:size-auto sm:px-4 sm:py-2" data-testid="mock-panel-trigger">
           <FlaskConical aria-hidden="true" className="size-4" />
-          Cenários
+          <span className="hidden sm:inline">Cenários</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="overflow-y-auto">
