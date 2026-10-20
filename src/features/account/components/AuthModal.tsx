@@ -33,7 +33,7 @@ export function AuthModal({ mode, redirect, subtitle, children }: AuthModalProps
 
   return (
     <Dialog open onOpenChange={(open) => !open && close()}>
-      <DialogContent className="max-w-sm gap-0 p-6 sm:p-8">
+      <DialogContent className="max-w-md gap-0 border-b-4 border-b-primary p-6 sm:p-8">
         <DialogTitle className="sr-only">{mode === 'login' ? 'Entrar' : 'Criar conta'}</DialogTitle>
 
         <div className="mb-2 flex items-center justify-center gap-3">

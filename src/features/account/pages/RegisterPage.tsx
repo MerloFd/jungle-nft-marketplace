@@ -82,7 +82,7 @@ export function RegisterPage() {
           <Input name="name" autoComplete="name" placeholder="Nome completo" value={values.name} onChange={(e) => set('name', e.target.value)} />
         </Field>
 
-        <Field label="Nome de usuário" hideLabel hint="Letras minúsculas, números e _ (3 a 24 caracteres)." error={errors.username} required>
+        <Field label="Nome de usuário" hideLabel hint="Apenas letras minúsculas, números e _, de 3 a 24 caracteres." error={errors.username} required>
           <Input
             name="username"
             autoComplete="username"
